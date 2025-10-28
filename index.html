@@ -1,0 +1,2314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Evolving Color Life - Stagnation Version</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #111;
+            color: #fff;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            -webkit-text-size-adjust: 100%; /* Prevent text size adjustment on mobile */
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        h1 {
+            margin: 0 0 20px 0;
+            font-size: 24px;
+            color: #fff;
+        }
+        
+        #canvas {
+            border: 2px solid #333;
+            cursor: crosshair;
+            background: #000;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            touch-action: none; /* Prevent default touch behaviors like scrolling */
+            -webkit-user-select: none; /* Prevent text selection on touch */
+            user-select: none;
+        }
+        
+        #canvas.eraser-cursor {
+            cursor: none; /* Hide default cursor when using eraser */
+        }
+        
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: #2a2a2a;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+            min-height: 44px; /* iOS minimum recommended touch target */
+        }
+        
+        button:hover {
+            background: #3a3a3a;
+        }
+        
+        button:active {
+            background: #1a1a1a;
+        }
+        
+        button.active {
+            background: #4a4a4a;
+            border-color: #666;
+        }
+        
+        .info {
+            margin: 20px 0;
+            padding: 15px;
+            background: #1a1a1a;
+            border-radius: 8px;
+            max-width: 800px;
+            line-height: 1.6;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Force exactly 2 columns */
+            gap: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+            max-width: 800px;
+        }
+        
+        .stat {
+            padding: 6px 10px;
+            background: #2a2a2a;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            min-width: 190px; /* Fixed minimum width */
+            font-size: 12px;
+        }
+        
+        .stat span {
+            display: inline-block;
+            min-width: 25px;
+            text-align: right;
+        }
+        
+        .canvas-info {
+            margin-top: 5px;
+            font-size: 11px;
+            color: #fff;
+            text-align: left;
+        }
+        
+        .color-button {
+            padding: 6px 10px;
+            background: #2a2a2a;
+            color: #fff;
+            border: 2px solid #444;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            min-width: 190px; /* Fixed minimum width to prevent shifting */
+            justify-content: flex-start;
+            white-space: nowrap;
+        }
+        
+        .color-button:hover {
+            background: #3a3a3a;
+            border-color: #666;
+        }
+        
+        .color-button.active {
+            background: #4a4a4a;
+            border-color: #888;
+            box-shadow: 0 0 10px rgba(255,255,255,0.3);
+        }
+        
+        .color-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
+            display: inline-block;
+        }
+        
+        .color-button .count,
+        .color-button .moving-count {
+            display: inline-block;
+            min-width: 20px;
+            text-align: right;
+        }
+        
+        select, input[type="range"] {
+            padding: 5px;
+            background: #2a2a2a;
+            color: #fff;
+            border: 1px solid #444;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        
+        select {
+            min-width: 80px;
+            font-size: 14px;
+        }
+        
+        select option {
+            background: #2a2a2a;
+            color: #fff;
+        }
+        
+        .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>~The Colorful Game of Life~</h1>
+    
+    <canvas id="canvas"></canvas>
+    <div class="canvas-info">
+        Generation: <span id="generation">0</span> | Zoom: <span id="zoomDisplay">1.00x</span>
+    </div>
+    
+    <!-- Row 1: Play/Pause, Step, Clear, Eraser, Zoom -->
+    <div class="controls">
+        <button id="playPause">▶ Play</button>
+        <button id="step">Step</button>
+        <button id="clear">Clear</button>
+        <button class="color-button" id="eraserButton">
+            <span style="font-size: 16px;">🗑️</span> Eraser
+        </button>
+        <button id="zoomButton">Zoom: OFF</button>
+    </div>
+    
+    <!-- Row 2: Line Tool, Rectangle Tool, Oval Tool, Random -->
+    <div class="controls">
+        <button id="lineToolButton">Line Tool: OFF</button>
+        <button id="rectangleToolButton">Rectangle Tool: OFF</button>
+        <button id="ovalToolButton">Oval Tool: OFF</button>
+        <button id="random">Random</button>
+    </div>
+    
+    <!-- Row 3: Speed, Neighbors Fight, Moving Cells -->
+    <div class="controls">
+        <div class="slider-container">
+            <label>Speed:</label>
+            <input type="range" id="speed" min="1" max="20" value="5">
+            <span id="speedValue">5</span>
+        </div>
+        <button id="toggleNeighborsFight">Neighbors Fight: OFF</button>
+        <button id="toggleMovingCells" class="active">Moving Cells: ON</button>
+    </div>
+    
+    <!-- Row 3.5: Rainbow Wars Slider and Mobile Button -->
+    <div class="controls">
+        <div class="slider-container">
+            <label>Rainbow Wars Rate:</label>
+            <input type="range" id="rainbowWarsRate" min="1" max="300" value="100">
+            <span id="rainbowWarsValue">100</span>
+        </div>
+        <button id="sizeMobile">Mobile (100x150)</button>
+    </div>
+    
+    <!-- Row 4: Custom Canvas Settings -->
+    <div class="controls">
+        <label>Canvas Size:</label>
+        <div class="slider-container">
+            <label>Width:</label>
+            <select id="canvasWidth">
+                <option value="50">50</option>
+                <option value="75">75</option>
+                <option value="100">100</option>
+                <option value="150">150</option>
+                <option value="200" selected>200</option>
+                <option value="250">250</option>
+                <option value="300">300</option>
+                <option value="400">400</option>
+                <option value="500">500</option>
+            </select>
+        </div>
+        <div class="slider-container">
+            <label>Height:</label>
+            <select id="canvasHeight">
+                <option value="50">50</option>
+                <option value="75">75</option>
+                <option value="100">100</option>
+                <option value="150" selected>150</option>
+                <option value="175">175</option>
+                <option value="200">200</option>
+                <option value="250">250</option>
+                <option value="300">300</option>
+                <option value="400">400</option>
+                <option value="500">500</option>
+            </select>
+        </div>
+        <button id="applyCanvasSize">Apply Size</button>
+    </div>
+    
+    <div class="stats" id="stats">
+        <button class="color-button active" data-color="1" id="colorWhite">
+            <span class="color-indicator" style="background: white;"></span> 
+            White: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
+        </button>
+        <button class="color-button" data-color="2" id="colorRed">
+            <span class="color-indicator" style="background: #ff0000;"></span> 
+            Red: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
+        </button>
+        <button class="color-button" data-color="3" id="colorOrange">
+            <span class="color-indicator" style="background: #ff8800;"></span> 
+            Orange: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
+        </button>
+        <button class="color-button" data-color="4" id="colorYellow">
+            <span class="color-indicator" style="background: #ffff00;"></span> 
+            Yellow: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
+        </button>
+        <button class="color-button" data-color="5" id="colorGreen">
+            <span class="color-indicator" style="background: #00ff00;"></span> 
+            Green: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
+        </button>
+        <button class="color-button" data-color="6" id="colorCyan">
+            <span class="color-indicator" style="background: #00ffff;"></span> 
+            Cyan: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
+        </button>
+        <button class="color-button" data-color="7" id="colorBlue">
+            <span class="color-indicator" style="background: #0088ff;"></span> 
+            Blue: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
+        </button>
+        <button class="color-button" data-color="8" id="colorPurple">
+            <span class="color-indicator" style="background: #8800ff;"></span> 
+            Purple: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
+        </button>
+        <button class="color-button" data-color="9" id="colorMagenta">
+            <span class="color-indicator" style="background: #ff00ff;"></span> 
+            Magenta: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
+        </button>
+    </div>
+    
+    <div class="controls">
+        <label>Cellular Automaton Rules:</label>
+    </div>
+    
+    <div class="controls">
+        <label>Birth (Neighbors):</label>
+        <div class="slider-container">
+            <label>Min:</label>
+            <input type="range" id="birthMin" min="0" max="8" value="3">
+            <span id="birthMinValue">3</span>
+        </div>
+        <div class="slider-container">
+            <label>Max:</label>
+            <input type="range" id="birthMax" min="0" max="8" value="3">
+            <span id="birthMaxValue">3</span>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <label>Survival (Neighbors):</label>
+        <div class="slider-container">
+            <label>Min:</label>
+            <input type="range" id="survivalMin" min="0" max="8" value="2">
+            <span id="survivalMinValue">2</span>
+        </div>
+        <div class="slider-container">
+            <label>Max:</label>
+            <input type="range" id="survivalMax" min="0" max="8" value="3">
+            <span id="survivalMaxValue">3</span>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <label>Evolution (Neighbors):</label>
+        <div class="slider-container">
+            <label>Min:</label>
+            <input type="range" id="evolutionMin" min="1" max="8" value="4">
+            <span id="evolutionMinValue">4</span>
+        </div>
+        <div class="slider-container">
+            <label>Max:</label>
+            <input type="range" id="evolutionMax" min="1" max="8" value="4">
+            <span id="evolutionMaxValue">4</span>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <label>Death (Overpopulation):</label>
+        <div class="slider-container">
+            <label>At:</label>
+            <input type="range" id="deathMin" min="1" max="8" value="5">
+            <span id="deathMinValue">5</span>
+            <span style="margin-left: 5px;">+ neighbors</span>
+        </div>
+    </div>
+    
+    <div class="controls">
+        <button id="resetRulesToDefault">Reset Rules to Default</button>
+    </div>
+    
+    <div class="info">
+        <h3>Game Rules:</h3>
+        <ul>
+            <li><strong>Birth:</strong> Empty cells with 3 neighbors of a color are born as that color (default: 3-3, adjustable)</li>
+            <li><strong>Survival:</strong> Cells with 2-3 neighbors survive (default: 2-3, adjustable)</li>
+            <li><strong>Death:</strong> Cells die with &lt;2 neighbors (isolation) or 5+ neighbors (overpopulation, default: 5+, adjustable)</li>
+            <li><strong>Evolution:</strong> Cells with 4 neighbors evolve to next color (default: 4-4, adjustable)</li>
+            <li><strong>Magenta Special:</strong> Magenta cells in evolution range spawn moving white spore then die (with Moving Cells ON) or evolve to white (OFF)</li>
+            <li><strong>Rainbow Wars Rate:</strong> Controls stagnation threshold (1-300 generations, default: 100). Affects both Moving Cells spawning and Neighbors Fight conversion speed. Lower = faster action, higher = more stability.</li>
+            <li><strong>Moving Cells (Toggleable):</strong> When ON, stagnant cells (3+ same-color neighbors unchanged for Rainbow Wars Rate) spawn moving cells. Moving cells travel outward (70% straight/30% turn), pass through other movers, and after 4+ frames: stop on same color or convert entire groups of different colors.</li>
+            <li><strong>Neighbors Fight (Toggleable):</strong> When ON, stagnant colored cells (red-magenta) convert adjacent lower-colored neighbors to match their color after Rainbow Wars Rate generations. Creates color wars and territory expansion.</li>
+            <li><strong>Color Hierarchy:</strong> White → Red → Orange → Yellow → Green → Cyan → Blue → Purple → Magenta → (spawns White spore)</li>
+        </ul>
+        <h3>Drawing Tools:</h3>
+        <ul>
+            <li><strong>Color Selection:</strong> Click any color button, then click/drag on canvas to draw cells</li>
+            <li><strong>Eraser:</strong> Clears cells in a 5x5 area around your click</li>
+            <li><strong>Line Tool:</strong> Click start point, move mouse (red preview line), click end point to draw straight line</li>
+            <li><strong>Rectangle Tool:</strong> Click corner, move mouse (red preview box), click opposite corner to draw rectangle outline</li>
+            <li><strong>Oval Tool:</strong> Click corner, move mouse (red preview ellipse), click opposite corner to draw oval outline</li>
+            <li><strong>Zoom:</strong> Cycles through OFF → IN (click to zoom in) → OUT (click to zoom out) → OFF. Auto-limited to prevent black space based on canvas size.</li>
+            <li><strong>Mobile Button:</strong> Quick preset for 100x150 canvas (mobile-friendly size)</li>
+            <li><strong>Canvas Size:</strong> Custom width/height with dropdowns (50-500 cells). Click "Apply Size" to rebuild grid.</li>
+        </ul>
+        <p><strong>Tip:</strong> Try Rainbow Wars Rate at 50 for fast chaos, 200 for slow evolution! Combine Neighbors Fight + Moving Cells for epic color battles!</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        
+        // Configuration
+        let CELL_SIZE = 4;
+        let GRID_WIDTH = 200;
+        let GRID_HEIGHT = 150;
+        let SPEED = 5;
+        
+        // Rule parameters (adjustable)
+        let BIRTH_MIN_NEIGHBORS = 3;
+        let BIRTH_MAX_NEIGHBORS = 3;
+        let SURVIVAL_MIN_NEIGHBORS = 2;
+        let SURVIVAL_MAX_NEIGHBORS = 3;
+        let EVOLUTION_MIN_NEIGHBORS = 4;
+        let EVOLUTION_MAX_NEIGHBORS = 4;
+        let DEATH_MIN_NEIGHBORS = 5; // Death occurs at this many neighbors or more
+        let RAINBOW_WARS_RATE = 100; // Rate for stagnant cell spawning/neighbor fighting
+        
+        // Cell states
+        const CELL_EMPTY = 0;
+        const CELL_WHITE = 1;
+        const CELL_WHITE_MOVING = 10; // Special state for moving white cells
+        
+        // Color hierarchy
+        const COLORS = [
+            '#000000', // 0: Empty
+            '#ffffff', // 1: White
+            '#ff0000', // 2: Red
+            '#ff8800', // 3: Orange
+            '#ffff00', // 4: Yellow
+            '#00ff00', // 5: Green
+            '#00ffff', // 6: Cyan
+            '#0088ff', // 7: Blue
+            '#8800ff', // 8: Purple
+            '#ff00ff'  // 9: Magenta
+        ];
+        
+        // Grid state
+        let grid = [];
+        let movingCells = []; // Track moving white cells {x, y, dx, dy}
+        let stagnationTimers = []; // Track frames since last change for each cell
+        let generation = 0;
+        let isPlaying = false;
+        let mouseDown = false;
+        let lastCell = null;
+        let lastUpdate = 0;
+        let selectedColor = 1; // Currently selected color for drawing (default: white)
+        let eraserMode = false; // Track if eraser is active
+        let previousColor = 1; // Track color before eraser was activated
+        let zoomLevel = 1; // Zoom level (1 = normal, 2 = 2x zoom, etc)
+        let viewOffsetX = 0; // Viewport offset for panning when zoomed
+        let viewOffsetY = 0;
+        let movingCellsEnabled = true; // Toggle for moving cells feature
+        let neighborsFightEnabled = false; // Toggle for neighbors fight feature
+        let zoomMode = 0; // 0 = normal, 1 = zoom in mode, 2 = zoom out mode
+        let lineToolActive = false; // Toggle for line drawing tool
+        let lineStartPoint = null; // First point of line
+        let previewLineEnd = null; // Current mouse position for line preview
+        let rectangleToolActive = false; // Toggle for rectangle drawing tool
+        let rectangleStartPoint = null; // First point of rectangle
+        let previewRectangleEnd = null; // Current mouse position for rectangle preview
+        let ovalToolActive = false; // Toggle for oval drawing tool
+        let ovalStartPoint = null; // First point of oval
+        let previewOvalEnd = null; // Current mouse position for oval preview
+        let eraserCursorPos = null; // Track mouse position for eraser cursor {x, y} in grid coords
+        
+        // Initialize grid
+        function initGrid() {
+            grid = Array(GRID_HEIGHT).fill(null).map(() => Array(GRID_WIDTH).fill(0));
+            stagnationTimers = Array(GRID_HEIGHT).fill(null).map(() => Array(GRID_WIDTH).fill(0));
+            movingCells = [];
+        }
+        
+        // Resize canvas
+        function resizeCanvas() {
+            canvas.width = GRID_WIDTH * CELL_SIZE;
+            canvas.height = GRID_HEIGHT * CELL_SIZE;
+        }
+        
+        // Draw grid
+        function drawGrid() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Calculate visible grid area based on zoom
+            const cellsVisibleX = Math.ceil(GRID_WIDTH / zoomLevel);
+            const cellsVisibleY = Math.ceil(GRID_HEIGHT / zoomLevel);
+            
+            // Clamp view offset to grid bounds
+            viewOffsetX = Math.max(0, Math.min(viewOffsetX, GRID_WIDTH - cellsVisibleX));
+            viewOffsetY = Math.max(0, Math.min(viewOffsetY, GRID_HEIGHT - cellsVisibleY));
+            
+            const effectiveCellSize = CELL_SIZE * zoomLevel;
+            
+            // Draw regular cells
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    // Only draw cells in visible viewport
+                    if (x >= viewOffsetX && x < viewOffsetX + cellsVisibleX &&
+                        y >= viewOffsetY && y < viewOffsetY + cellsVisibleY) {
+                        
+                        const cell = grid[y][x];
+                        if (cell > 0 && cell < 10) {
+                            ctx.fillStyle = COLORS[cell];
+                            const screenX = (x - viewOffsetX) * effectiveCellSize;
+                            const screenY = (y - viewOffsetY) * effectiveCellSize;
+                            ctx.fillRect(screenX, screenY, effectiveCellSize, effectiveCellSize);
+                        }
+                    }
+                }
+            }
+            
+            // Draw moving cells in their respective colors
+            movingCells.forEach(cell => {
+                // Only draw moving cells in visible viewport
+                if (cell.x >= viewOffsetX && cell.x < viewOffsetX + cellsVisibleX &&
+                    cell.y >= viewOffsetY && cell.y < viewOffsetY + cellsVisibleY) {
+                    
+                    const color = cell.color || 1; // Default to white if no color specified
+                    ctx.fillStyle = COLORS[color];
+                    const screenX = (cell.x - viewOffsetX) * effectiveCellSize;
+                    const screenY = (cell.y - viewOffsetY) * effectiveCellSize;
+                    ctx.fillRect(screenX, screenY, effectiveCellSize, effectiveCellSize);
+                }
+            });
+            
+            // Draw line tool preview if active and start point is set
+            if (lineToolActive && lineStartPoint && previewLineEnd) {
+                ctx.strokeStyle = '#ff0000'; // Red line
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                
+                const startScreenX = (lineStartPoint.x - viewOffsetX) * effectiveCellSize + effectiveCellSize / 2;
+                const startScreenY = (lineStartPoint.y - viewOffsetY) * effectiveCellSize + effectiveCellSize / 2;
+                const endScreenX = (previewLineEnd.x - viewOffsetX) * effectiveCellSize + effectiveCellSize / 2;
+                const endScreenY = (previewLineEnd.y - viewOffsetY) * effectiveCellSize + effectiveCellSize / 2;
+                
+                ctx.moveTo(startScreenX, startScreenY);
+                ctx.lineTo(endScreenX, endScreenY);
+                ctx.stroke();
+            }
+            
+            // Draw rectangle tool preview
+            if (rectangleToolActive && rectangleStartPoint && previewRectangleEnd) {
+                ctx.strokeStyle = '#ff0000'; // Red outline
+                ctx.lineWidth = 1;
+                
+                const startScreenX = (rectangleStartPoint.x - viewOffsetX) * effectiveCellSize;
+                const startScreenY = (rectangleStartPoint.y - viewOffsetY) * effectiveCellSize;
+                const endScreenX = (previewRectangleEnd.x - viewOffsetX) * effectiveCellSize + effectiveCellSize;
+                const endScreenY = (previewRectangleEnd.y - viewOffsetY) * effectiveCellSize + effectiveCellSize;
+                
+                ctx.strokeRect(startScreenX, startScreenY, endScreenX - startScreenX, endScreenY - startScreenY);
+            }
+            
+            // Draw oval tool preview
+            if (ovalToolActive && ovalStartPoint && previewOvalEnd) {
+                ctx.strokeStyle = '#ff0000'; // Red outline
+                ctx.lineWidth = 1;
+                
+                const centerScreenX = ((ovalStartPoint.x + previewOvalEnd.x) / 2 - viewOffsetX) * effectiveCellSize + effectiveCellSize / 2;
+                const centerScreenY = ((ovalStartPoint.y + previewOvalEnd.y) / 2 - viewOffsetY) * effectiveCellSize + effectiveCellSize / 2;
+                const radiusX = Math.abs(previewOvalEnd.x - ovalStartPoint.x) * effectiveCellSize / 2 + effectiveCellSize / 2;
+                const radiusY = Math.abs(previewOvalEnd.y - ovalStartPoint.y) * effectiveCellSize / 2 + effectiveCellSize / 2;
+                
+                ctx.beginPath();
+                ctx.ellipse(centerScreenX, centerScreenY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+                ctx.stroke();
+            }
+            
+            // Draw eraser cursor - 5x5 circle with red outline
+            if (eraserMode && eraserCursorPos) {
+                ctx.strokeStyle = '#ff0000'; // Red outline
+                ctx.lineWidth = 2;
+                
+                // Center of cursor is at the grid cell position
+                const centerScreenX = (eraserCursorPos.x - viewOffsetX) * effectiveCellSize + effectiveCellSize / 2;
+                const centerScreenY = (eraserCursorPos.y - viewOffsetY) * effectiveCellSize + effectiveCellSize / 2;
+                
+                // Radius for 5x5 circle (2.5 cells)
+                const radius = 2.5 * effectiveCellSize;
+                
+                ctx.beginPath();
+                ctx.arc(centerScreenX, centerScreenY, radius, 0, 2 * Math.PI);
+                ctx.stroke();
+            }
+            
+            updateStats();
+        }
+        
+        // Count neighbors of specific color (ignoring moving cells)
+        function countNeighbors(x, y, targetColor) {
+            let count = 0;
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    if (dx === 0 && dy === 0) continue;
+                    const nx = x + dx;
+                    const ny = y + dy;
+                    if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                        if (grid[ny][nx] === targetColor) {
+                            count++;
+                        }
+                    }
+                }
+            }
+            return count;
+        }
+        
+        // Bresenham's line algorithm
+        function drawLine(x0, y0, x1, y1, color) {
+            const dx = Math.abs(x1 - x0);
+            const dy = Math.abs(y1 - y0);
+            const sx = x0 < x1 ? 1 : -1;
+            const sy = y0 < y1 ? 1 : -1;
+            let err = dx - dy;
+            
+            while (true) {
+                // Draw point
+                if (x0 >= 0 && x0 < GRID_WIDTH && y0 >= 0 && y0 < GRID_HEIGHT) {
+                    grid[y0][x0] = color;
+                }
+                
+                if (x0 === x1 && y0 === y1) break;
+                
+                const e2 = 2 * err;
+                if (e2 > -dy) {
+                    err -= dy;
+                    x0 += sx;
+                }
+                if (e2 < dx) {
+                    err += dx;
+                    y0 += sy;
+                }
+            }
+        }
+        
+        // Draw rectangle outline (not filled)
+        function drawRectangle(x0, y0, x1, y1, color) {
+            const minX = Math.min(x0, x1);
+            const maxX = Math.max(x0, x1);
+            const minY = Math.min(y0, y1);
+            const maxY = Math.max(y0, y1);
+            
+            // Draw top and bottom edges
+            for (let x = minX; x <= maxX; x++) {
+                if (x >= 0 && x < GRID_WIDTH) {
+                    if (minY >= 0 && minY < GRID_HEIGHT) {
+                        grid[minY][x] = color;
+                    }
+                    if (maxY >= 0 && maxY < GRID_HEIGHT) {
+                        grid[maxY][x] = color;
+                    }
+                }
+            }
+            
+            // Draw left and right edges
+            for (let y = minY; y <= maxY; y++) {
+                if (y >= 0 && y < GRID_HEIGHT) {
+                    if (minX >= 0 && minX < GRID_WIDTH) {
+                        grid[y][minX] = color;
+                    }
+                    if (maxX >= 0 && maxX < GRID_WIDTH) {
+                        grid[y][maxX] = color;
+                    }
+                }
+            }
+        }
+        
+        // Draw oval outline (not filled) using midpoint ellipse algorithm
+        function drawOval(x0, y0, x1, y1, color) {
+            const centerX = Math.floor((x0 + x1) / 2);
+            const centerY = Math.floor((y0 + y1) / 2);
+            const radiusX = Math.floor(Math.abs(x1 - x0) / 2);
+            const radiusY = Math.floor(Math.abs(y1 - y0) / 2);
+            
+            if (radiusX === 0 && radiusY === 0) {
+                // Just a point
+                if (centerX >= 0 && centerX < GRID_WIDTH && centerY >= 0 && centerY < GRID_HEIGHT) {
+                    grid[centerY][centerX] = color;
+                }
+                return;
+            }
+            
+            // Midpoint ellipse algorithm to draw outline
+            let x = 0;
+            let y = radiusY;
+            
+            // Region 1
+            let d1 = (radiusY * radiusY) - (radiusX * radiusX * radiusY) + (0.25 * radiusX * radiusX);
+            let dx = 2 * radiusY * radiusY * x;
+            let dy = 2 * radiusX * radiusX * y;
+            
+            // Plot initial points in all four quadrants
+            const plotEllipsePoints = (cx, cy, x, y) => {
+                const points = [
+                    {x: cx + x, y: cy + y},
+                    {x: cx - x, y: cy + y},
+                    {x: cx + x, y: cy - y},
+                    {x: cx - x, y: cy - y}
+                ];
+                points.forEach(p => {
+                    if (p.x >= 0 && p.x < GRID_WIDTH && p.y >= 0 && p.y < GRID_HEIGHT) {
+                        grid[p.y][p.x] = color;
+                    }
+                });
+            };
+            
+            // Region 1
+            while (dx < dy) {
+                plotEllipsePoints(centerX, centerY, x, y);
+                
+                if (d1 < 0) {
+                    x++;
+                    dx = dx + (2 * radiusY * radiusY);
+                    d1 = d1 + dx + (radiusY * radiusY);
+                } else {
+                    x++;
+                    y--;
+                    dx = dx + (2 * radiusY * radiusY);
+                    dy = dy - (2 * radiusX * radiusX);
+                    d1 = d1 + dx - dy + (radiusY * radiusY);
+                }
+            }
+            
+            // Region 2
+            let d2 = ((radiusY * radiusY) * ((x + 0.5) * (x + 0.5))) + ((radiusX * radiusX) * ((y - 1) * (y - 1))) - (radiusX * radiusX * radiusY * radiusY);
+            
+            while (y >= 0) {
+                plotEllipsePoints(centerX, centerY, x, y);
+                
+                if (d2 > 0) {
+                    y--;
+                    dy = dy - (2 * radiusX * radiusX);
+                    d2 = d2 + (radiusX * radiusX) - dy;
+                } else {
+                    y--;
+                    x++;
+                    dx = dx + (2 * radiusY * radiusY);
+                    dy = dy - (2 * radiusX * radiusX);
+                    d2 = d2 + dx - dy + (radiusX * radiusX);
+                }
+            }
+        }
+        
+        // Find all connected cells of the same color (flood fill)
+        function findConnectedGroup(startX, startY, targetColor, visited = null) {
+            if (visited === null) {
+                visited = Array(GRID_HEIGHT).fill(null).map(() => Array(GRID_WIDTH).fill(false));
+            }
+            
+            const group = [];
+            const queue = [{x: startX, y: startY}];
+            visited[startY][startX] = true;
+            
+            while (queue.length > 0) {
+                const {x, y} = queue.shift();
+                group.push({x, y});
+                
+                // Check all 8 neighbors
+                for (let dy = -1; dy <= 1; dy++) {
+                    for (let dx = -1; dx <= 1; dx++) {
+                        if (dx === 0 && dy === 0) continue;
+                        const nx = x + dx;
+                        const ny = y + dy;
+                        if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                            if (!visited[ny][nx] && grid[ny][nx] === targetColor) {
+                                visited[ny][nx] = true;
+                                queue.push({x: nx, y: ny});
+                            }
+                        }
+                    }
+                }
+            }
+            
+            return group;
+        }
+        
+        // Check if there are any moving white cells in neighboring positions
+        function hasMovingWhiteNeighbor(x, y) {
+            for (let movingCell of movingCells) {
+                const dx = Math.abs(movingCell.x - x);
+                const dy = Math.abs(movingCell.y - y);
+                if (dx <= 1 && dy <= 1 && !(dx === 0 && dy === 0)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        // Update grid for next generation
+        function updateGrid() {
+            const newGrid = Array(GRID_HEIGHT).fill(null).map(() => Array(GRID_WIDTH).fill(0));
+            const newStagnationTimers = Array(GRID_HEIGHT).fill(null).map(() => Array(GRID_WIDTH).fill(0));
+            const newMovingCells = [];
+            
+            // Process moving white cells first
+            movingCells.forEach(movingCell => {
+                let {x, y, dx, dy, color, age} = movingCell;
+                const movingColor = color || 1; // Default to white if no color specified
+                const cellAge = age || 0; // Track how many frames this cell has been moving
+                
+                // Check if current position has stationary cell of same color - if so, stop moving
+                if (grid[y][x] === movingColor) {
+                    return; // This moving cell stops and becomes part of the stationary population
+                }
+                
+                // PRIORITY 1: Check if neighboring any colored cells (not same color, not empty) - only if age > 3
+                if (cellAge > 3) {
+                    let otherColorNeighbor = null;
+                    for (let dy2 = -1; dy2 <= 1; dy2++) {
+                        for (let dx2 = -1; dx2 <= 1; dx2++) {
+                            if (dx2 === 0 && dy2 === 0) continue;
+                            const nx = x + dx2;
+                            const ny = y + dy2;
+                            if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                                const neighborCell = grid[ny][nx];
+                                // If neighbor is any color except same color or empty
+                                if (neighborCell >= 1 && neighborCell <= 9 && neighborCell !== movingColor) {
+                                    otherColorNeighbor = {x: nx, y: ny, color: neighborCell};
+                                    break;
+                                }
+                            }
+                        }
+                        if (otherColorNeighbor) break;
+                    }
+                    
+                    if (otherColorNeighbor) {
+                        // Find entire connected group of this color
+                        const group = findConnectedGroup(otherColorNeighbor.x, otherColorNeighbor.y, otherColorNeighbor.color);
+                        
+                        // Convert entire group to moving cell's color
+                        group.forEach(cell => {
+                            newGrid[cell.y][cell.x] = movingColor;
+                            newStagnationTimers[cell.y][cell.x] = 0;
+                        });
+                        
+                        // Stop moving and become stationary at current position
+                        newGrid[y][x] = movingColor;
+                        newStagnationTimers[y][x] = 0;
+                        return;
+                    }
+                }
+                
+                // PRIORITY 2: Check if neighboring any stationary cells of SAME color - only if age > 3
+                if (cellAge > 3) {
+                    let hasSameColorNeighbor = false;
+                    for (let dy2 = -1; dy2 <= 1; dy2++) {
+                        for (let dx2 = -1; dx2 <= 1; dx2++) {
+                            if (dx2 === 0 && dy2 === 0) continue;
+                            const nx = x + dx2;
+                            const ny = y + dy2;
+                            if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                                if (grid[ny][nx] === movingColor) {
+                                    hasSameColorNeighbor = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (hasSameColorNeighbor) break;
+                    }
+                    
+                    if (hasSameColorNeighbor) {
+                        // Stop moving and become stationary at current position
+                        newGrid[y][x] = movingColor;
+                        newStagnationTimers[y][x] = 0;
+                        return;
+                    }
+                }
+                
+                // Random direction change (30% chance) - rotate by 1/8th (45 degrees)
+                if (Math.random() < 0.3) {
+                    // Define the 8 directions in clockwise order
+                    const directions = [
+                        {dx: 0, dy: -1},   // North
+                        {dx: 1, dy: -1},   // Northeast
+                        {dx: 1, dy: 0},    // East
+                        {dx: 1, dy: 1},    // Southeast
+                        {dx: 0, dy: 1},    // South
+                        {dx: -1, dy: 1},   // Southwest
+                        {dx: -1, dy: 0},   // West
+                        {dx: -1, dy: -1}   // Northwest
+                    ];
+                    
+                    // Find current direction index
+                    let currentIndex = 0;
+                    for (let i = 0; i < directions.length; i++) {
+                        if (directions[i].dx === dx && directions[i].dy === dy) {
+                            currentIndex = i;
+                            break;
+                        }
+                    }
+                    
+                    // Rotate clockwise or counter-clockwise by 1 position (45 degrees)
+                    const rotateClockwise = Math.random() < 0.5;
+                    const newIndex = rotateClockwise 
+                        ? (currentIndex + 1) % directions.length 
+                        : (currentIndex - 1 + directions.length) % directions.length;
+                    
+                    dx = directions[newIndex].dx;
+                    dy = directions[newIndex].dy;
+                }
+                
+                // Calculate new position
+                let newX = x + dx;
+                let newY = y + dy;
+                
+                // Bounce off walls
+                if (newX < 0 || newX >= GRID_WIDTH) {
+                    dx = -dx;
+                    newX = x + dx;
+                }
+                if (newY < 0 || newY >= GRID_HEIGHT) {
+                    dy = -dy;
+                    newY = y + dy;
+                }
+                
+                // Check if new position has stationary cell of same color - if so, stop
+                if (grid[newY][newX] === movingColor) {
+                    // Moving cell stops at current position, becomes stationary
+                    newGrid[y][x] = movingColor;
+                    newStagnationTimers[y][x] = 0;
+                    return;
+                }
+                
+                // Check if new position neighbors stationary cells of same color - only if age > 3
+                if (cellAge > 3) {
+                    let hasSameColorNeighbor = false;
+                    for (let dy2 = -1; dy2 <= 1; dy2++) {
+                        for (let dx2 = -1; dx2 <= 1; dx2++) {
+                            if (dx2 === 0 && dy2 === 0) continue;
+                            const nx = newX + dx2;
+                            const ny = newY + dy2;
+                            if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                                if (grid[ny][nx] === movingColor) {
+                                    hasSameColorNeighbor = true;
+                                    break;
+                                }
+                            }
+                        }
+                        if (hasSameColorNeighbor) break;
+                    }
+                    
+                    if (hasSameColorNeighbor) {
+                        // Stop moving and become stationary at current position (before moving)
+                        newGrid[y][x] = movingColor;
+                        newStagnationTimers[y][x] = 0;
+                        return;
+                    }
+                }
+                
+                // Check if new position neighbors any cells of different color - only if age > 3
+                if (cellAge > 3) {
+                    let otherColorNeighbor = null;
+                    for (let dy2 = -1; dy2 <= 1; dy2++) {
+                        for (let dx2 = -1; dx2 <= 1; dx2++) {
+                            if (dx2 === 0 && dy2 === 0) continue;
+                            const nx = newX + dx2;
+                            const ny = newY + dy2;
+                            if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                                const neighborCell = grid[ny][nx];
+                                // If neighbor is any color except same color or empty
+                                if (neighborCell >= 1 && neighborCell <= 9 && neighborCell !== movingColor) {
+                                    otherColorNeighbor = {x: nx, y: ny, color: neighborCell};
+                                    break;
+                                }
+                            }
+                        }
+                        if (otherColorNeighbor) break;
+                    }
+                    
+                    if (otherColorNeighbor) {
+                        // Find entire connected group of this color
+                        const group = findConnectedGroup(otherColorNeighbor.x, otherColorNeighbor.y, otherColorNeighbor.color);
+                        
+                        // Convert entire group to moving cell's color
+                        group.forEach(cell => {
+                            newGrid[cell.y][cell.x] = movingColor;
+                            newStagnationTimers[cell.y][cell.x] = 0;
+                        });
+                        
+                        // Move to new position and become stationary
+                        newGrid[newY][newX] = movingColor;
+                        newStagnationTimers[newY][newX] = 0;
+                        return;
+                    }
+                }
+                
+                // If new position is empty or has another moving cell, continue moving
+                if (grid[newY][newX] === CELL_EMPTY || grid[newY][newX] === CELL_WHITE_MOVING) {
+                    newMovingCells.push({x: newX, y: newY, dx, dy, color: movingColor, age: cellAge + 1});
+                } else {
+                    // Hit another obstacle, stop and become stationary at current position
+                    newGrid[y][x] = movingColor;
+                    newStagnationTimers[y][x] = 0;
+                }
+            });
+            
+            // Process regular cells
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    // Skip if this cell was already processed by moving white cells
+                    if (newGrid[y][x] !== 0) {
+                        continue;
+                    }
+                    
+                    const cell = grid[y][x];
+                    
+                    if (cell === CELL_EMPTY) {
+                        // Check for birth (adjustable neighbor range)
+                        for (let color = 1; color <= 9; color++) {
+                            const colorNeighbors = countNeighbors(x, y, color);
+                            if (colorNeighbors >= BIRTH_MIN_NEIGHBORS && colorNeighbors <= BIRTH_MAX_NEIGHBORS) {
+                                newGrid[y][x] = color;
+                                newStagnationTimers[y][x] = 0;
+                                break;
+                            }
+                        }
+                    } else if (cell >= 1 && cell <= 9) {
+                        const neighbors = countNeighbors(x, y, cell);
+                        
+                        // Magenta special case: evolution range neighbors
+                        if (cell === 9 && neighbors >= EVOLUTION_MIN_NEIGHBORS && neighbors <= EVOLUTION_MAX_NEIGHBORS) {
+                            if (movingCellsEnabled) {
+                                // Moving cells enabled: spawn moving white and die
+                                newGrid[y][x] = CELL_EMPTY;
+                                newStagnationTimers[y][x] = 0;
+                                
+                                // Spawn one moving white cell in random empty neighbor
+                                const emptyNeighbors = [];
+                                for (let dy = -1; dy <= 1; dy++) {
+                                    for (let dx = -1; dx <= 1; dx++) {
+                                        if (dx === 0 && dy === 0) continue;
+                                        const nx = x + dx;
+                                        const ny = y + dy;
+                                        if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                                            if (grid[ny][nx] === CELL_EMPTY) {
+                                                emptyNeighbors.push({x: nx, y: ny, dx, dy});
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                                if (emptyNeighbors.length > 0) {
+                                    const spawn = emptyNeighbors[Math.floor(Math.random() * emptyNeighbors.length)];
+                                    newMovingCells.push({...spawn, color: 1, age: 0}); // White moving cell with age 0
+                                }
+                            } else {
+                                // Moving cells disabled: evolve to white
+                                newGrid[y][x] = 1; // White
+                                newStagnationTimers[y][x] = 0;
+                            }
+                        }
+                        // Survival: adjustable neighbor range
+                        else if (neighbors >= SURVIVAL_MIN_NEIGHBORS && neighbors <= SURVIVAL_MAX_NEIGHBORS) {
+                            newGrid[y][x] = cell;
+                            newStagnationTimers[y][x] = stagnationTimers[y][x] + 1;
+                        }
+                        // Evolution: evolve to next color based on adjustable neighbor range
+                        else if (neighbors >= EVOLUTION_MIN_NEIGHBORS && neighbors <= EVOLUTION_MAX_NEIGHBORS && cell < 9) {
+                            newGrid[y][x] = cell + 1;
+                            newStagnationTimers[y][x] = 0;
+                        }
+                        else if (neighbors >= EVOLUTION_MIN_NEIGHBORS && neighbors <= EVOLUTION_MAX_NEIGHBORS && cell === 9 && !movingCellsEnabled) {
+                            // Magenta evolves to white when moving cells disabled
+                            newGrid[y][x] = 1; // White
+                            newStagnationTimers[y][x] = 0;
+                        }
+                        // Otherwise: die
+                        else {
+                            newGrid[y][x] = CELL_EMPTY;
+                            newStagnationTimers[y][x] = 0;
+                        }
+                    }
+                }
+            }
+            
+            // Apply stagnation conversion: check cells that haven't changed in 100 frames
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    const cell = newGrid[y][x];
+                    
+                    // Any colored cell (including white) with 3+ neighbors of same color spawns moving cell after Rainbow Wars Rate
+                    // Only if moving cells are enabled
+                    if (movingCellsEnabled && cell >= 1 && cell <= 9 && newStagnationTimers[y][x] >= RAINBOW_WARS_RATE) {
+                        const sameColorNeighbors = countNeighbors(x, y, cell);
+                        if (sameColorNeighbors >= 3) {
+                            // Find an empty neighbor to spawn the moving cell
+                            const emptyNeighbors = [];
+                            for (let dy = -1; dy <= 1; dy++) {
+                                for (let dx = -1; dx <= 1; dx++) {
+                                    if (dx === 0 && dy === 0) continue;
+                                    const nx = x + dx;
+                                    const ny = y + dy;
+                                    if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                                        if (newGrid[ny][nx] === CELL_EMPTY) {
+                                            emptyNeighbors.push({x: nx, y: ny, dx, dy});
+                                        }
+                                    }
+                                }
+                            }
+                            
+                            if (emptyNeighbors.length > 0) {
+                                const spawn = emptyNeighbors[Math.floor(Math.random() * emptyNeighbors.length)];
+                                // Store the color with the moving cell, age starts at 0
+                                newMovingCells.push({...spawn, color: cell, age: 0});
+                                newStagnationTimers[y][x] = 0; // Reset timer after spawning
+                            }
+                        }
+                    }
+                    
+                    // Colored cells (not white) that are stagnant do color conversion if Neighbors Fight is enabled
+                    if (neighborsFightEnabled && cell >= 2 && cell <= 9 && newStagnationTimers[y][x] >= RAINBOW_WARS_RATE) {
+                        // Check all neighbors
+                        for (let dy = -1; dy <= 1; dy++) {
+                            for (let dx = -1; dx <= 1; dx++) {
+                                if (dx === 0 && dy === 0) continue;
+                                const nx = x + dx;
+                                const ny = y + dy;
+                                if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                                    const neighborCell = newGrid[ny][nx];
+                                    // If neighbor is a lower color (higher number = higher in hierarchy)
+                                    if (neighborCell >= 1 && neighborCell <= 9 && neighborCell < cell) {
+                                        // Convert neighbor to match this cell's color
+                                        newGrid[ny][nx] = cell;
+                                        newStagnationTimers[ny][nx] = 0; // Reset timer for converted cell
+                                    }
+                                }
+                            }
+                        }
+                        // Reset the stagnation timer after conversion attempt
+                        newStagnationTimers[y][x] = 0;
+                    }
+                }
+            }
+            
+            grid = newGrid;
+            stagnationTimers = newStagnationTimers;
+            movingCells = newMovingCells;
+            generation++;
+        }
+        
+        // Update statistics
+        function updateStats() {
+            const counts = Array(10).fill(0);
+            const movingCounts = Array(10).fill(0);
+            
+            // Count stationary cells
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    counts[grid[y][x]]++;
+                }
+            }
+            
+            // Count moving cells by color
+            movingCells.forEach(cell => {
+                const color = cell.color || 1;
+                movingCounts[color]++;
+            });
+            
+            document.getElementById('generation').textContent = generation;
+            document.getElementById('zoomDisplay').textContent = zoomLevel.toFixed(2) + 'x';
+            
+            // Update color button counts
+            document.querySelector('#colorWhite .count').textContent = counts[1];
+            document.querySelector('#colorWhite .moving-count').textContent = movingCounts[1];
+            document.querySelector('#colorRed .count').textContent = counts[2];
+            document.querySelector('#colorRed .moving-count').textContent = movingCounts[2];
+            document.querySelector('#colorOrange .count').textContent = counts[3];
+            document.querySelector('#colorOrange .moving-count').textContent = movingCounts[3];
+            document.querySelector('#colorYellow .count').textContent = counts[4];
+            document.querySelector('#colorYellow .moving-count').textContent = movingCounts[4];
+            document.querySelector('#colorGreen .count').textContent = counts[5];
+            document.querySelector('#colorGreen .moving-count').textContent = movingCounts[5];
+            document.querySelector('#colorCyan .count').textContent = counts[6];
+            document.querySelector('#colorCyan .moving-count').textContent = movingCounts[6];
+            document.querySelector('#colorBlue .count').textContent = counts[7];
+            document.querySelector('#colorBlue .moving-count').textContent = movingCounts[7];
+            document.querySelector('#colorPurple .count').textContent = counts[8];
+            document.querySelector('#colorPurple .moving-count').textContent = movingCounts[8];
+            document.querySelector('#colorMagenta .count').textContent = counts[9];
+            document.querySelector('#colorMagenta .moving-count').textContent = movingCounts[9];
+        }
+        
+        // Game loop
+        function gameLoop(timestamp) {
+            if (isPlaying) {
+                if (timestamp - lastUpdate > 1000 / SPEED) {
+                    updateGrid();
+                    drawGrid();
+                    lastUpdate = timestamp;
+                }
+                requestAnimationFrame(gameLoop);
+            }
+        }
+        
+        // Clear grid
+        function clearGrid() {
+            initGrid();
+            generation = 0;
+            drawGrid();
+        }
+        
+        // Random grid
+        function randomGrid() {
+            for (let y = 0; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < GRID_WIDTH; x++) {
+                    grid[y][x] = Math.random() > 0.85 ? 1 : 0;
+                }
+            }
+            generation = 0;
+            drawGrid();
+        }
+        
+        // Pattern generators for interesting reactions
+        function loadRainbowCollision() {
+            clearGrid();
+            const cx = Math.floor(GRID_WIDTH / 2);
+            const cy = Math.floor(GRID_HEIGHT / 2);
+            
+            // Create vertical stripes of different colors converging toward center
+            for (let i = 0; i < 7; i++) {
+                const color = i + 2; // Red through Purple (2-8)
+                const startX = Math.floor(i * GRID_WIDTH / 8);
+                const endX = Math.floor((i + 1) * GRID_WIDTH / 8);
+                
+                for (let x = startX; x < endX; x++) {
+                    for (let y = 0; y < GRID_HEIGHT; y++) {
+                        if (Math.random() > 0.7) {
+                            grid[y][x] = color;
+                        }
+                    }
+                }
+            }
+        }
+        
+        function loadCornerWars() {
+            clearGrid();
+            const size = 20;
+            
+            // Top-left: White
+            for (let y = 0; y < size; y++) {
+                for (let x = 0; x < size; x++) {
+                    if (Math.random() > 0.3) grid[y][x] = 1;
+                }
+            }
+            
+            // Top-right: Magenta
+            for (let y = 0; y < size; y++) {
+                for (let x = GRID_WIDTH - size; x < GRID_WIDTH; x++) {
+                    if (Math.random() > 0.3) grid[y][x] = 9;
+                }
+            }
+            
+            // Bottom-left: Cyan
+            for (let y = GRID_HEIGHT - size; y < GRID_HEIGHT; y++) {
+                for (let x = 0; x < size; x++) {
+                    if (Math.random() > 0.3) grid[y][x] = 6;
+                }
+            }
+            
+            // Bottom-right: Orange
+            for (let y = GRID_HEIGHT - size; y < GRID_HEIGHT; y++) {
+                for (let x = GRID_WIDTH - size; x < GRID_WIDTH; x++) {
+                    if (Math.random() > 0.3) grid[y][x] = 3;
+                }
+            }
+        }
+        
+        function loadColorSpiral() {
+            clearGrid();
+            const cx = Math.floor(GRID_WIDTH / 2);
+            const cy = Math.floor(GRID_HEIGHT / 2);
+            
+            // Create a spiral of alternating colors
+            let angle = 0;
+            let radius = 2;
+            let color = 1;
+            
+            while (radius < Math.min(GRID_WIDTH, GRID_HEIGHT) / 2) {
+                for (let i = 0; i < 20; i++) {
+                    const x = cx + Math.floor(radius * Math.cos(angle));
+                    const y = cy + Math.floor(radius * Math.sin(angle));
+                    
+                    if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
+                        // Create small cluster
+                        for (let dy = -2; dy <= 2; dy++) {
+                            for (let dx = -2; dx <= 2; dx++) {
+                                const nx = x + dx;
+                                const ny = y + dy;
+                                if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT && Math.random() > 0.4) {
+                                    grid[ny][nx] = color;
+                                }
+                            }
+                        }
+                    }
+                    
+                    angle += 0.3;
+                    radius += 0.5;
+                }
+                
+                color = (color % 9) + 1; // Cycle through colors
+            }
+        }
+        
+        function loadConcentricRings() {
+            clearGrid();
+            const cx = Math.floor(GRID_WIDTH / 2);
+            const cy = Math.floor(GRID_HEIGHT / 2);
+            
+            // Create concentric rings of different colors
+            for (let radius = 10; radius < Math.min(GRID_WIDTH, GRID_HEIGHT) / 2; radius += 10) {
+                const color = Math.floor((radius / 10) % 9) + 1;
+                
+                for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
+                    const x = cx + Math.floor(radius * Math.cos(angle));
+                    const y = cy + Math.floor(radius * Math.sin(angle));
+                    
+                    if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
+                        // Create thick ring
+                        for (let dy = -2; dy <= 2; dy++) {
+                            for (let dx = -2; dx <= 2; dx++) {
+                                const nx = x + dx;
+                                const ny = y + dy;
+                                if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT && Math.random() > 0.3) {
+                                    grid[ny][nx] = color;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        function loadCheckerboard() {
+            clearGrid();
+            const blockSize = 15;
+            
+            for (let by = 0; by < Math.ceil(GRID_HEIGHT / blockSize); by++) {
+                for (let bx = 0; bx < Math.ceil(GRID_WIDTH / blockSize); bx++) {
+                    const color = ((bx + by) % 8) + 2; // Cycle through colors 2-9
+                    
+                    for (let y = by * blockSize; y < Math.min((by + 1) * blockSize, GRID_HEIGHT); y++) {
+                        for (let x = bx * blockSize; x < Math.min((bx + 1) * blockSize, GRID_WIDTH); x++) {
+                            if (Math.random() > 0.3) {
+                                grid[y][x] = color;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Stable structures
+        function loadStableBlock() {
+            clearGrid();
+            const cx = Math.floor(GRID_WIDTH / 2);
+            const cy = Math.floor(GRID_HEIGHT / 2);
+            
+            // 2x2 block (stable with 3 neighbors each)
+            grid[cy][cx] = 5;     // Green
+            grid[cy][cx+1] = 5;
+            grid[cy+1][cx] = 5;
+            grid[cy+1][cx+1] = 5;
+            
+            // Add surrounding blocks at different distances
+            const offsets = [
+                {dx: -10, dy: -10, color: 2},
+                {dx: 10, dy: -10, color: 4},
+                {dx: -10, dy: 10, color: 6},
+                {dx: 10, dy: 10, color: 8}
+            ];
+            
+            offsets.forEach(off => {
+                const bx = cx + off.dx;
+                const by = cy + off.dy;
+                grid[by][bx] = off.color;
+                grid[by][bx+1] = off.color;
+                grid[by+1][bx] = off.color;
+                grid[by+1][bx+1] = off.color;
+            });
+        }
+        
+        function loadOscillator() {
+            clearGrid();
+            const cx = Math.floor(GRID_WIDTH / 2);
+            const cy = Math.floor(GRID_HEIGHT / 2);
+            
+            // Blinker pattern (3 in a row) - oscillates between horizontal and vertical
+            // Using red
+            grid[cy][cx-1] = 2;
+            grid[cy][cx] = 2;
+            grid[cy][cx+1] = 2;
+            
+            // Add more oscillators in different colors
+            grid[cy-10][cx-1] = 4; // Yellow blinker
+            grid[cy-10][cx] = 4;
+            grid[cy-10][cx+1] = 4;
+            
+            grid[cy+10][cx-1] = 6; // Cyan blinker
+            grid[cy+10][cx] = 6;
+            grid[cy+10][cx+1] = 6;
+            
+            // Toad pattern (2x3) - 2-period oscillator
+            grid[cy][cx+10] = 3;
+            grid[cy][cx+11] = 3;
+            grid[cy][cx+12] = 3;
+            grid[cy+1][cx+9] = 3;
+            grid[cy+1][cx+10] = 3;
+            grid[cy+1][cx+11] = 3;
+        }
+        
+        function loadSymmetricFlower() {
+            clearGrid();
+            const cx = Math.floor(GRID_WIDTH / 2);
+            const cy = Math.floor(GRID_HEIGHT / 2);
+            
+            // Create a flower-like symmetrical pattern
+            // Center core
+            grid[cy][cx] = 9; // Magenta center
+            
+            // 8-way symmetry petals
+            const petalPattern = [
+                [0, -1], [0, -2], [0, -3], // North
+                [1, -1], [2, -2], // NE
+                [1, 0], [2, 0], [3, 0],   // East
+                [1, 1], [2, 2],   // SE
+                [0, 1], [0, 2], [0, 3],   // South
+                [-1, 1], [-2, 2], // SW
+                [-1, 0], [-2, 0], [-3, 0], // West
+                [-1, -1], [-2, -2] // NW
+            ];
+            
+            let color = 1;
+            let colorChange = 0;
+            petalPattern.forEach((pos, i) => {
+                if (i % 3 === 0 && i > 0) color = (color % 9) + 1;
+                grid[cy + pos[1]][cx + pos[0]] = color;
+            });
+        }
+        
+        function loadDiamond() {
+            clearGrid();
+            const cx = Math.floor(GRID_WIDTH / 2);
+            const cy = Math.floor(GRID_HEIGHT / 2);
+            
+            // Create diamond patterns with different colors
+            const sizes = [5, 10, 15, 20];
+            const colors = [2, 4, 6, 8];
+            
+            sizes.forEach((size, idx) => {
+                const color = colors[idx];
+                
+                // Draw hollow diamond
+                for (let i = 0; i < size; i++) {
+                    // Top half
+                    grid[cy - size + i][cx - i] = color;
+                    grid[cy - size + i][cx + i] = color;
+                    
+                    // Bottom half
+                    grid[cy + i][cx - (size - i)] = color;
+                    grid[cy + i][cx + (size - i)] = color;
+                }
+            });
+        }
+        
+        function loadColorTower() {
+            clearGrid();
+            const cx = Math.floor(GRID_WIDTH / 2);
+            const startY = 20;
+            
+            // Create vertical tower with color gradient
+            for (let i = 0; i < 9; i++) {
+                const color = i + 1;
+                const y = startY + (i * 12);
+                
+                // Create stable 4x4 block for each color
+                for (let dy = 0; dy < 4; dy++) {
+                    for (let dx = 0; dx < 4; dx++) {
+                        if (y + dy < GRID_HEIGHT) {
+                            grid[y + dy][cx - 2 + dx] = color;
+                        }
+                    }
+                }
+            }
+        }
+        
+        function loadSpinwheel() {
+            clearGrid();
+            const cx = Math.floor(GRID_WIDTH / 2);
+            const cy = Math.floor(GRID_HEIGHT / 2);
+            
+            // Create a pinwheel/spinwheel pattern with rotational symmetry
+            const armLength = 15;
+            const colors = [2, 4, 6, 8]; // Red, Yellow, Cyan, Purple
+            
+            for (let arm = 0; arm < 4; arm++) {
+                const angle = (arm * Math.PI / 2); // 90 degree increments
+                const color = colors[arm];
+                
+                for (let dist = 3; dist < armLength; dist++) {
+                    const x = cx + Math.floor(dist * Math.cos(angle));
+                    const y = cy + Math.floor(dist * Math.sin(angle));
+                    
+                    // Create thick arm with perpendicular extension
+                    for (let perp = -1; perp <= 1; perp++) {
+                        const perpX = Math.floor(perp * Math.sin(angle));
+                        const perpY = Math.floor(-perp * Math.cos(angle));
+                        
+                        if (x + perpX >= 0 && x + perpX < GRID_WIDTH && 
+                            y + perpY >= 0 && y + perpY < GRID_HEIGHT) {
+                            grid[y + perpY][x + perpX] = color;
+                        }
+                    }
+                }
+            }
+            
+            // Add central core
+            for (let dy = -1; dy <= 1; dy++) {
+                for (let dx = -1; dx <= 1; dx++) {
+                    grid[cy + dy][cx + dx] = 9; // Magenta center
+                }
+            }
+        }
+        
+        // Mouse events
+        canvas.addEventListener('mousedown', (e) => {
+            // Skip right-click
+            if (e.button === 2) {
+                e.preventDefault();
+                return;
+            }
+            
+            if (e.button !== 0) return; // Only process left clicks
+            
+            const rect = canvas.getBoundingClientRect();
+            const effectiveCellSize = CELL_SIZE * zoomLevel;
+            const x = Math.floor(viewOffsetX + (e.clientX - rect.left) / effectiveCellSize);
+            const y = Math.floor(viewOffsetY + (e.clientY - rect.top) / effectiveCellSize);
+            
+            if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
+                if (zoomMode === 1) {
+                    // Zoom in mode
+                    zoomLevel = Math.min(10, zoomLevel + 1);
+                    
+                    // Center view on clicked cell
+                    const cellsVisibleX = Math.ceil(GRID_WIDTH / zoomLevel);
+                    const cellsVisibleY = Math.ceil(GRID_HEIGHT / zoomLevel);
+                    
+                    viewOffsetX = Math.floor(x - cellsVisibleX / 2);
+                    viewOffsetY = Math.floor(y - cellsVisibleY / 2);
+                    
+                    drawGrid();
+                } else if (zoomMode === 2) {
+                    // Zoom out mode
+                    const minZoom = getMinZoomLevel(); if (zoomLevel > minZoom) {
+                        const gridX = x;
+                        const gridY = y;
+                        
+                        if (zoomLevel > 1) { zoomLevel = Math.max(1, zoomLevel - 1); } else { zoomLevel = Math.max(minZoom, zoomLevel - 0.25); }
+                        
+                        // Recenter view on the clicked position
+                        const cellsVisibleX = Math.ceil(GRID_WIDTH / zoomLevel);
+                        const cellsVisibleY = Math.ceil(GRID_HEIGHT / zoomLevel);
+                        
+                        viewOffsetX = Math.floor(gridX - cellsVisibleX / 2);
+                        viewOffsetY = Math.floor(gridY - cellsVisibleY / 2);
+                        
+                        drawGrid();
+                    }
+                } else {
+                    // Normal drawing mode or shape tool modes
+                    if (lineToolActive) {
+                        // Line tool mode
+                        if (!lineStartPoint) {
+                            lineStartPoint = {x, y};
+                            previewLineEnd = {x, y};
+                        } else {
+                            drawLine(lineStartPoint.x, lineStartPoint.y, x, y, selectedColor);
+                            lineStartPoint = null;
+                            previewLineEnd = null;
+                            drawGrid();
+                        }
+                    } else if (rectangleToolActive) {
+                        // Rectangle tool mode
+                        if (!rectangleStartPoint) {
+                            rectangleStartPoint = {x, y};
+                            previewRectangleEnd = {x, y};
+                        } else {
+                            drawRectangle(rectangleStartPoint.x, rectangleStartPoint.y, x, y, selectedColor);
+                            rectangleStartPoint = null;
+                            previewRectangleEnd = null;
+                            drawGrid();
+                        }
+                    } else if (ovalToolActive) {
+                        // Oval tool mode
+                        if (!ovalStartPoint) {
+                            ovalStartPoint = {x, y};
+                            previewOvalEnd = {x, y};
+                        } else {
+                            drawOval(ovalStartPoint.x, ovalStartPoint.y, x, y, selectedColor);
+                            ovalStartPoint = null;
+                            previewOvalEnd = null;
+                            drawGrid();
+                        }
+                    } else {
+                        // Normal drawing mode
+                        mouseDown = true;
+                        if (eraserMode) {
+                            // Erase 5x5 circular area
+                            for (let dy = -2; dy <= 2; dy++) {
+                                for (let dx = -2; dx <= 2; dx++) {
+                                    // Check if point is within circle radius of 2.5
+                                    const distance = Math.sqrt(dx * dx + dy * dy);
+                                    if (distance <= 2.5) {
+                                        const nx = x + dx;
+                                        const ny = y + dy;
+                                        if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                                            grid[ny][nx] = 0;
+                                        }
+                                    }
+                                }
+                            }
+                            // Also remove any moving cells in the eraser area
+                            movingCells = movingCells.filter(cell => {
+                                const dx = cell.x - x;
+                                const dy = cell.y - y;
+                                const distance = Math.sqrt(dx * dx + dy * dy);
+                                return distance > 2.5;
+                            });
+                        } else {
+                            // If cell is occupied, erase it; otherwise draw with selected color
+                            grid[y][x] = grid[y][x] !== 0 ? 0 : selectedColor;
+                        }
+                        lastCell = {x, y};
+                        drawGrid();
+                    }
+                }
+            }
+        });
+        
+        canvas.addEventListener('mousemove', (e) => {
+            if (!mouseDown || zoomMode !== 0 || lineToolActive || rectangleToolActive || ovalToolActive) return;
+            const rect = canvas.getBoundingClientRect();
+            const effectiveCellSize = CELL_SIZE * zoomLevel;
+            const x = Math.floor(viewOffsetX + (e.clientX - rect.left) / effectiveCellSize);
+            const y = Math.floor(viewOffsetY + (e.clientY - rect.top) / effectiveCellSize);
+            
+            if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
+                if (!lastCell || lastCell.x !== x || lastCell.y !== y) {
+                    if (eraserMode) {
+                        // Erase 5x5 circular area
+                        for (let dy = -2; dy <= 2; dy++) {
+                            for (let dx = -2; dx <= 2; dx++) {
+                                // Check if point is within circle radius of 2.5
+                                const distance = Math.sqrt(dx * dx + dy * dy);
+                                if (distance <= 2.5) {
+                                    const nx = x + dx;
+                                    const ny = y + dy;
+                                    if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                                        grid[ny][nx] = 0;
+                                    }
+                                }
+                            }
+                        }
+                        // Also remove any moving cells in the eraser area
+                        movingCells = movingCells.filter(cell => {
+                            const dx = cell.x - x;
+                            const dy = cell.y - y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            return distance > 2.5;
+                        });
+                    } else {
+                        // If cell is occupied, erase it; otherwise draw with selected color
+                        grid[y][x] = grid[y][x] !== 0 ? 0 : selectedColor;
+                    }
+                    lastCell = {x, y};
+                    drawGrid();
+                }
+            }
+        });
+        
+        // Separate mousemove handlers for shape tool previews
+        canvas.addEventListener('mousemove', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const effectiveCellSize = CELL_SIZE * zoomLevel;
+            const x = Math.floor(viewOffsetX + (e.clientX - rect.left) / effectiveCellSize);
+            const y = Math.floor(viewOffsetY + (e.clientY - rect.top) / effectiveCellSize);
+            
+            // Track eraser cursor position
+            if (eraserMode && x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
+                eraserCursorPos = {x, y};
+                canvas.classList.add('eraser-cursor');
+                drawGrid();
+            } else if (eraserMode) {
+                eraserCursorPos = null;
+                canvas.classList.add('eraser-cursor');
+            } else {
+                eraserCursorPos = null;
+                canvas.classList.remove('eraser-cursor');
+            }
+            
+            if (lineToolActive && lineStartPoint) {
+                if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
+                    previewLineEnd = {x, y};
+                    drawGrid();
+                }
+            } else if (rectangleToolActive && rectangleStartPoint) {
+                if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
+                    previewRectangleEnd = {x, y};
+                    drawGrid();
+                }
+            } else if (ovalToolActive && ovalStartPoint) {
+                if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
+                    previewOvalEnd = {x, y};
+                    drawGrid();
+                }
+            }
+        });
+        
+        // Clear eraser cursor when mouse leaves canvas
+        canvas.addEventListener('mouseleave', () => {
+            eraserCursorPos = null;
+            canvas.classList.remove('eraser-cursor');
+            mouseDown = false;
+            lastCell = null;
+            if (eraserMode) {
+                drawGrid(); // Redraw to remove cursor
+            }
+        });
+        
+        // Prevent context menu on right click
+        canvas.addEventListener('contextmenu', (e) => {
+            e.preventDefault();
+        });
+        
+        // Touch events for mobile support
+        let lastTouchCell = null;
+        
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault(); // Prevent scrolling while drawing
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const effectiveCellSize = CELL_SIZE * zoomLevel;
+            const x = Math.floor(viewOffsetX + (touch.clientX - rect.left) / effectiveCellSize);
+            const y = Math.floor(viewOffsetY + (touch.clientY - rect.top) / effectiveCellSize);
+            
+            if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
+                if (zoomMode === 1) {
+                    // Zoom in mode
+                    zoomLevel = Math.min(10, zoomLevel + 1);
+                    
+                    // Center view on clicked cell
+                    const cellsVisibleX = Math.ceil(GRID_WIDTH / zoomLevel);
+                    const cellsVisibleY = Math.ceil(GRID_HEIGHT / zoomLevel);
+                    
+                    viewOffsetX = Math.floor(x - cellsVisibleX / 2);
+                    viewOffsetY = Math.floor(y - cellsVisibleY / 2);
+                    
+                    drawGrid();
+                } else if (zoomMode === 2) {
+                    // Zoom out mode
+                    const minZoom = getMinZoomLevel(); if (zoomLevel > minZoom) {
+                        const gridX = x;
+                        const gridY = y;
+                        
+                        if (zoomLevel > 1) { zoomLevel = Math.max(1, zoomLevel - 1); } else { zoomLevel = Math.max(minZoom, zoomLevel - 0.25); }
+                        
+                        // Recenter view on the clicked position
+                        const cellsVisibleX = Math.ceil(GRID_WIDTH / zoomLevel);
+                        const cellsVisibleY = Math.ceil(GRID_HEIGHT / zoomLevel);
+                        
+                        viewOffsetX = Math.floor(gridX - cellsVisibleX / 2);
+                        viewOffsetY = Math.floor(gridY - cellsVisibleY / 2);
+                        
+                        drawGrid();
+                    }
+                } else {
+                    // Normal drawing mode or shape tool modes
+                    if (lineToolActive) {
+                        // Line tool mode
+                        if (!lineStartPoint) {
+                            lineStartPoint = {x, y};
+                        } else {
+                            drawLine(lineStartPoint.x, lineStartPoint.y, x, y, selectedColor);
+                            lineStartPoint = null;
+                            drawGrid();
+                        }
+                    } else if (rectangleToolActive) {
+                        // Rectangle tool mode
+                        if (!rectangleStartPoint) {
+                            rectangleStartPoint = {x, y};
+                        } else {
+                            drawRectangle(rectangleStartPoint.x, rectangleStartPoint.y, x, y, selectedColor);
+                            rectangleStartPoint = null;
+                            drawGrid();
+                        }
+                    } else if (ovalToolActive) {
+                        // Oval tool mode
+                        if (!ovalStartPoint) {
+                            ovalStartPoint = {x, y};
+                        } else {
+                            drawOval(ovalStartPoint.x, ovalStartPoint.y, x, y, selectedColor);
+                            ovalStartPoint = null;
+                            drawGrid();
+                        }
+                    } else {
+                        // Normal drawing mode
+                        if (eraserMode) {
+                            // Erase 5x5 circular area
+                            for (let dy = -2; dy <= 2; dy++) {
+                                for (let dx = -2; dx <= 2; dx++) {
+                                    // Check if point is within circle radius of 2.5
+                                    const distance = Math.sqrt(dx * dx + dy * dy);
+                                    if (distance <= 2.5) {
+                                        const nx = x + dx;
+                                        const ny = y + dy;
+                                        if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                                            grid[ny][nx] = 0;
+                                        }
+                                    }
+                                }
+                            }
+                            // Also remove any moving cells in the eraser area
+                            movingCells = movingCells.filter(cell => {
+                                const dx = cell.x - x;
+                                const dy = cell.y - y;
+                                const distance = Math.sqrt(dx * dx + dy * dy);
+                                return distance > 2.5;
+                            });
+                        } else {
+                            // If cell is occupied, erase it; otherwise draw with selected color
+                            grid[y][x] = grid[y][x] !== 0 ? 0 : selectedColor;
+                        }
+                        lastTouchCell = {x, y};
+                        drawGrid();
+                    }
+                }
+            }
+        });
+        
+        canvas.addEventListener('touchmove', (e) => {
+            if (zoomMode !== 0 || lineToolActive || rectangleToolActive || ovalToolActive) return;
+            e.preventDefault(); // Prevent scrolling while drawing
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const effectiveCellSize = CELL_SIZE * zoomLevel;
+            const x = Math.floor(viewOffsetX + (touch.clientX - rect.left) / effectiveCellSize);
+            const y = Math.floor(viewOffsetY + (touch.clientY - rect.top) / effectiveCellSize);
+            
+            if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
+                if (!lastTouchCell || lastTouchCell.x !== x || lastTouchCell.y !== y) {
+                    if (eraserMode) {
+                        // Erase 5x5 circular area
+                        for (let dy = -2; dy <= 2; dy++) {
+                            for (let dx = -2; dx <= 2; dx++) {
+                                // Check if point is within circle radius of 2.5
+                                const distance = Math.sqrt(dx * dx + dy * dy);
+                                if (distance <= 2.5) {
+                                    const nx = x + dx;
+                                    const ny = y + dy;
+                                    if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                                        grid[ny][nx] = 0;
+                                    }
+                                }
+                            }
+                        }
+                        // Also remove any moving cells in the eraser area
+                        movingCells = movingCells.filter(cell => {
+                            const dx = cell.x - x;
+                            const dy = cell.y - y;
+                            const distance = Math.sqrt(dx * dx + dy * dy);
+                            return distance > 2.5;
+                        });
+                    } else {
+                        // If cell is occupied, erase it; otherwise draw with selected color
+                        grid[y][x] = grid[y][x] !== 0 ? 0 : selectedColor;
+                    }
+                    lastTouchCell = {x, y};
+                    drawGrid();
+                }
+            }
+        });
+        
+        canvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            lastTouchCell = null;
+        });
+        
+        canvas.addEventListener('mouseup', () => {
+            mouseDown = false;
+            lastCell = null;
+        });
+        
+        // Control events
+        document.getElementById('playPause').addEventListener('click', function() {
+            deactivateZoom();
+            isPlaying = !isPlaying;
+            this.textContent = isPlaying ? '⏸ Pause' : '▶ Play';
+            if (isPlaying) {
+                requestAnimationFrame(gameLoop);
+            }
+        });
+        
+        document.getElementById('step').addEventListener('click', () => {
+            deactivateZoom();
+            updateGrid();
+            drawGrid();
+        });
+        
+        document.getElementById('clear').addEventListener('click', () => {
+            deactivateZoom();
+            clearGrid();
+        });
+        
+        document.getElementById('random').addEventListener('click', () => {
+            deactivateZoom();
+            randomGrid();
+        });
+        
+        document.getElementById('toggleNeighborsFight').addEventListener('click', function() {
+            deactivateZoom();
+            neighborsFightEnabled = !neighborsFightEnabled;
+            this.textContent = neighborsFightEnabled ? 'Neighbors Fight: ON' : 'Neighbors Fight: OFF';
+            this.classList.toggle('active');
+        });
+        
+        document.getElementById('toggleMovingCells').addEventListener('click', function() {
+            deactivateZoom();
+            movingCellsEnabled = !movingCellsEnabled;
+            this.textContent = movingCellsEnabled ? 'Moving Cells: ON' : 'Moving Cells: OFF';
+            this.classList.toggle('active');
+            
+            // Clear all existing moving cells when disabled
+            if (!movingCellsEnabled) {
+                movingCells = [];
+                drawGrid();
+            }
+        });
+        
+        document.getElementById('rainbowWarsRate').addEventListener('input', (e) => {
+            deactivateZoom();
+            RAINBOW_WARS_RATE = parseInt(e.target.value);
+            document.getElementById('rainbowWarsValue').textContent = RAINBOW_WARS_RATE;
+        });
+        
+        document.getElementById('lineToolButton').addEventListener('click', function() {
+            deactivateZoom();
+            deactivateRectangleTool();
+            deactivateOvalTool();
+            lineToolActive = !lineToolActive;
+            this.textContent = lineToolActive ? 'Line Tool: ON' : 'Line Tool: OFF';
+            this.classList.toggle('active');
+            
+            if (!lineToolActive) {
+                lineStartPoint = null;
+                previewLineEnd = null;
+                drawGrid();
+            }
+        });
+        
+        document.getElementById('rectangleToolButton').addEventListener('click', function() {
+            deactivateZoom();
+            deactivateLineTool();
+            deactivateOvalTool();
+            rectangleToolActive = !rectangleToolActive;
+            this.textContent = rectangleToolActive ? 'Rectangle Tool: ON' : 'Rectangle Tool: OFF';
+            this.classList.toggle('active');
+            
+            if (!rectangleToolActive) {
+                rectangleStartPoint = null;
+                previewRectangleEnd = null;
+                drawGrid();
+            }
+        });
+        
+        document.getElementById('ovalToolButton').addEventListener('click', function() {
+            deactivateZoom();
+            deactivateLineTool();
+            deactivateRectangleTool();
+            ovalToolActive = !ovalToolActive;
+            this.textContent = ovalToolActive ? 'Oval Tool: ON' : 'Oval Tool: OFF';
+            this.classList.toggle('active');
+            
+            if (!ovalToolActive) {
+                ovalStartPoint = null;
+                previewOvalEnd = null;
+                drawGrid();
+            }
+        });
+        
+        document.getElementById('zoomButton').addEventListener('click', function() {
+            zoomMode = (zoomMode + 1) % 3; // Cycle through 0, 1, 2
+            
+            if (zoomMode === 0) {
+                this.textContent = 'Zoom: OFF';
+                this.classList.remove('active');
+            } else if (zoomMode === 1) {
+                this.textContent = 'Zoom: IN';
+                this.classList.add('active');
+            } else if (zoomMode === 2) {
+                this.textContent = 'Zoom: OUT';
+                this.classList.add('active');
+            }
+        });
+        
+        // Function to deactivate zoom mode
+        function deactivateZoom() {
+            if (zoomMode !== 0) {
+                zoomMode = 0;
+                const zoomButton = document.getElementById('zoomButton');
+                zoomButton.textContent = 'Zoom: OFF';
+                zoomButton.classList.remove('active');
+            }
+        }
+        
+        // Calculate minimum zoom level to fit entire canvas
+        function getMinZoomLevel() {
+            const maxCanvasWidth = 800; // Max display width
+            const maxCanvasHeight = 600; // Max display height
+            
+            const zoomToFitWidth = maxCanvasWidth / (GRID_WIDTH * CELL_SIZE);
+            const zoomToFitHeight = maxCanvasHeight / (GRID_HEIGHT * CELL_SIZE);
+            
+            return Math.max(0.25, Math.min(zoomToFitWidth, zoomToFitHeight));
+        }
+        
+        // Function to deactivate line tool
+        function deactivateLineTool() {
+            if (lineToolActive) {
+                lineToolActive = false;
+                lineStartPoint = null;
+                previewLineEnd = null;
+                const lineButton = document.getElementById('lineToolButton');
+                lineButton.textContent = 'Line Tool: OFF';
+                lineButton.classList.remove('active');
+                drawGrid(); // Redraw to clear preview line
+            }
+        }
+        
+        // Function to deactivate rectangle tool
+        function deactivateRectangleTool() {
+            if (rectangleToolActive) {
+                rectangleToolActive = false;
+                rectangleStartPoint = null;
+                previewRectangleEnd = null;
+                const rectButton = document.getElementById('rectangleToolButton');
+                rectButton.textContent = 'Rectangle Tool: OFF';
+                rectButton.classList.remove('active');
+                drawGrid();
+            }
+        }
+        
+        // Function to deactivate oval tool
+        function deactivateOvalTool() {
+            if (ovalToolActive) {
+                ovalToolActive = false;
+                ovalStartPoint = null;
+                previewOvalEnd = null;
+                const ovalButton = document.getElementById('ovalToolButton');
+                ovalButton.textContent = 'Oval Tool: OFF';
+                ovalButton.classList.remove('active');
+                drawGrid();
+            }
+        }
+        
+        // Color selection buttons
+        document.querySelectorAll('.color-button').forEach(button => {
+            button.addEventListener('click', function() {
+                // Deactivate zoom and all drawing tools when color/eraser button is clicked
+                deactivateZoom();
+                deactivateLineTool();
+                deactivateRectangleTool();
+                deactivateOvalTool();
+                
+                // Check if eraser button was clicked
+                if (this.id === 'eraserButton') {
+                    if (eraserMode) {
+                        // Deactivate eraser, restore previous color
+                        eraserMode = false;
+                        eraserCursorPos = null;
+                        canvas.classList.remove('eraser-cursor');
+                        this.classList.remove('active');
+                        
+                        // Reactivate the previous color button
+                        const previousColorButton = document.querySelector(`[data-color="${previousColor}"]`);
+                        if (previousColorButton) {
+                            previousColorButton.classList.add('active');
+                        }
+                        selectedColor = previousColor;
+                        drawGrid(); // Redraw to remove cursor
+                    } else {
+                        // Activate eraser
+                        eraserMode = true;
+                        // Save current color
+                        previousColor = selectedColor;
+                        
+                        // Remove active from all buttons and activate eraser
+                        document.querySelectorAll('.color-button').forEach(b => b.classList.remove('active'));
+                        this.classList.add('active');
+                    }
+                } else {
+                    // Color button clicked
+                    eraserMode = false;
+                    eraserCursorPos = null;
+                    canvas.classList.remove('eraser-cursor');
+                    // Remove active class from all buttons
+                    document.querySelectorAll('.color-button').forEach(b => b.classList.remove('active'));
+                    // Add active class to clicked button
+                    this.classList.add('active');
+                    // Set selected color
+                    selectedColor = parseInt(this.getAttribute('data-color'));
+                    previousColor = selectedColor; // Update previous color
+                    drawGrid(); // Redraw to remove cursor if it was showing
+                }
+            });
+        });
+        
+        document.getElementById('speed').addEventListener('input', (e) => {
+            SPEED = parseInt(e.target.value);
+            document.getElementById('speedValue').textContent = SPEED;
+        });
+        
+        // Birth rule sliders
+        document.getElementById('birthMin').addEventListener('input', (e) => {
+            deactivateZoom();
+            let newMin = parseInt(e.target.value);
+            if (newMin > BIRTH_MAX_NEIGHBORS) {
+                newMin = BIRTH_MAX_NEIGHBORS;
+                e.target.value = newMin;
+            }
+            BIRTH_MIN_NEIGHBORS = newMin;
+            document.getElementById('birthMinValue').textContent = newMin;
+        });
+        
+        document.getElementById('birthMax').addEventListener('input', (e) => {
+            deactivateZoom();
+            let newMax = parseInt(e.target.value);
+            if (newMax < BIRTH_MIN_NEIGHBORS) {
+                newMax = BIRTH_MIN_NEIGHBORS;
+                e.target.value = newMax;
+            }
+            BIRTH_MAX_NEIGHBORS = newMax;
+            document.getElementById('birthMaxValue').textContent = newMax;
+        });
+        
+        // Survival rule sliders
+        document.getElementById('survivalMin').addEventListener('input', (e) => {
+            deactivateZoom();
+            let newMin = parseInt(e.target.value);
+            if (newMin > SURVIVAL_MAX_NEIGHBORS) {
+                newMin = SURVIVAL_MAX_NEIGHBORS;
+                e.target.value = newMin;
+            }
+            SURVIVAL_MIN_NEIGHBORS = newMin;
+            document.getElementById('survivalMinValue').textContent = newMin;
+        });
+        
+        document.getElementById('survivalMax').addEventListener('input', (e) => {
+            deactivateZoom();
+            let newMax = parseInt(e.target.value);
+            if (newMax < SURVIVAL_MIN_NEIGHBORS) {
+                newMax = SURVIVAL_MIN_NEIGHBORS;
+                e.target.value = newMax;
+            }
+            SURVIVAL_MAX_NEIGHBORS = newMax;
+            document.getElementById('survivalMaxValue').textContent = newMax;
+        });
+        
+        // Evolution rule sliders
+        document.getElementById('evolutionMin').addEventListener('input', (e) => {
+            deactivateZoom();
+            let newMin = parseInt(e.target.value);
+            if (newMin > EVOLUTION_MAX_NEIGHBORS) {
+                newMin = EVOLUTION_MAX_NEIGHBORS;
+                e.target.value = newMin;
+            }
+            EVOLUTION_MIN_NEIGHBORS = newMin;
+            document.getElementById('evolutionMinValue').textContent = newMin;
+        });
+        
+        document.getElementById('evolutionMax').addEventListener('input', (e) => {
+            deactivateZoom();
+            let newMax = parseInt(e.target.value);
+            if (newMax < EVOLUTION_MIN_NEIGHBORS) {
+                newMax = EVOLUTION_MIN_NEIGHBORS;
+                e.target.value = newMax;
+            }
+            EVOLUTION_MAX_NEIGHBORS = newMax;
+            document.getElementById('evolutionMaxValue').textContent = newMax;
+            
+            // Update death minimum to stay above evolution max
+            if (DEATH_MIN_NEIGHBORS <= newMax) {
+                DEATH_MIN_NEIGHBORS = newMax + 1;
+                document.getElementById('deathMin').value = DEATH_MIN_NEIGHBORS;
+                document.getElementById('deathMinValue').textContent = DEATH_MIN_NEIGHBORS;
+            }
+        });
+        
+        // Death rule slider
+        document.getElementById('deathMin').addEventListener('input', (e) => {
+            deactivateZoom();
+            let newMin = parseInt(e.target.value);
+            // Death must be above evolution max
+            if (newMin <= EVOLUTION_MAX_NEIGHBORS) {
+                newMin = EVOLUTION_MAX_NEIGHBORS + 1;
+                e.target.value = newMin;
+            }
+            DEATH_MIN_NEIGHBORS = newMin;
+            document.getElementById('deathMinValue').textContent = newMin;
+        });
+        
+        // Reset all rules to default values
+        document.getElementById('resetRulesToDefault').addEventListener('click', function() {
+            deactivateZoom();
+            
+            // Birth: 3-3
+            BIRTH_MIN_NEIGHBORS = 3;
+            BIRTH_MAX_NEIGHBORS = 3;
+            document.getElementById('birthMin').value = 3;
+            document.getElementById('birthMax').value = 3;
+            document.getElementById('birthMinValue').textContent = 3;
+            document.getElementById('birthMaxValue').textContent = 3;
+            
+            // Survival: 2-3
+            SURVIVAL_MIN_NEIGHBORS = 2;
+            SURVIVAL_MAX_NEIGHBORS = 3;
+            document.getElementById('survivalMin').value = 2;
+            document.getElementById('survivalMax').value = 3;
+            document.getElementById('survivalMinValue').textContent = 2;
+            document.getElementById('survivalMaxValue').textContent = 3;
+            
+            // Evolution: 4-4
+            EVOLUTION_MIN_NEIGHBORS = 4;
+            EVOLUTION_MAX_NEIGHBORS = 4;
+            document.getElementById('evolutionMin').value = 4;
+            document.getElementById('evolutionMax').value = 4;
+            document.getElementById('evolutionMinValue').textContent = 4;
+            document.getElementById('evolutionMaxValue').textContent = 4;
+            
+            // Death: 5+
+            DEATH_MIN_NEIGHBORS = 5;
+            document.getElementById('deathMin').value = 5;
+            document.getElementById('deathMinValue').textContent = 5;
+            
+            // Rainbow Wars Rate: 100
+            RAINBOW_WARS_RATE = 100;
+            document.getElementById('rainbowWarsRate').value = 100;
+            document.getElementById('rainbowWarsValue').textContent = 100;
+        });
+        
+        // Size preset buttons
+        document.getElementById('sizeMobile').addEventListener('click', function() {
+            deactivateZoom();
+            document.getElementById('canvasWidth').value = '100';
+            document.getElementById('canvasHeight').value = '150';
+            
+            GRID_WIDTH = 100;
+            GRID_HEIGHT = 150;
+            
+            // Reset zoom to 1 if current zoom is below new minimum
+            const minZoom = getMinZoomLevel();
+            if (zoomLevel < minZoom) {
+                zoomLevel = 1;
+                viewOffsetX = 0;
+                viewOffsetY = 0;
+            }
+            
+            initGrid();
+            resizeCanvas();
+            drawGrid();
+        });
+        
+        document.getElementById('applyCanvasSize').addEventListener('click', function() {
+            deactivateZoom();
+            const newWidth = parseInt(document.getElementById('canvasWidth').value);
+            const newHeight = parseInt(document.getElementById('canvasHeight').value);
+            
+            GRID_WIDTH = newWidth;
+            GRID_HEIGHT = newHeight;
+            
+            // Reset zoom to 1 if current zoom is below new minimum
+            const minZoom = getMinZoomLevel();
+            if (zoomLevel < minZoom) {
+                zoomLevel = 1;
+                viewOffsetX = 0;
+                viewOffsetY = 0;
+            }
+            
+            initGrid();
+            resizeCanvas();
+            drawGrid();
+        });
+        
+        // Detect mobile device and set canvas to 100x150
+        function isMobileDevice() {
+            return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) 
+                || (window.innerWidth <= 768);
+        }
+        
+        // If mobile device, automatically set to mobile size
+        if (isMobileDevice()) {
+            GRID_WIDTH = 100;
+            GRID_HEIGHT = 150;
+            document.getElementById('canvasWidth').value = '100';
+            document.getElementById('canvasHeight').value = '150';
+        }
+        
+        // Initialize
+        initGrid();
+        resizeCanvas();
+        drawGrid();
+    </script>
+</body>
+</html>
