@@ -1780,11 +1780,8 @@
         // Color swatch selection
         document.querySelectorAll('.color-swatch').forEach(button => {
             button.addEventListener('click', function() {
-                // Deactivate zoom and all drawing tools when color is selected
+                // Deactivate zoom and eraser when color is selected (but keep shape tools active)
                 deactivateZoom();
-                deactivateLineTool();
-                deactivateRectangleTool();
-                deactivateOvalTool();
                 deactivateEraser();
                 
                 // Remove active class from all swatches
