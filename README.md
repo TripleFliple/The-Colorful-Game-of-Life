@@ -1,7 +1,5 @@
 # 🌈 The Colorful Game of Life
 
-A mesmerizing cellular automaton based on Conway's Game of Life, enhanced with 9-color evolution, territorial color wars, and moving spore mechanics that create emergent warfare patterns.
-
 ## 🎮 What Is This?
 
 This is Conway's Game of Life reimagined with colors and propagation. Cells don't just live and die, they can evolve through a rainbow hierarchy. When they become stagnant they can invade neighboring colors and/or spawn moving cells in an attempt to continue their growth and development.
