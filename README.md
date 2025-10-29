@@ -155,15 +155,9 @@ The game works great on mobile devices!
 - **Stagnation Timer**: Tracks how long each cell has been unchanged
 - **Touch Events**: Full mobile support with touch handling
 
-## 💡 Ideas for Modifications
-
-What to expect in future updates:
-
-- **Custom Patterns**: Add preset pattern buttons
-- **Different Movement**: Change moving cell behavior (speed, turn probability, etc.)
-- **Visual Effects**: Add trails, glowing cells, or particle effects
-
 ## 📜 Credits
+
+- I designed and organized this program in 3 days using Claude Sonnet 4.5
 
 Inspired by:
 - **John Conway's Game of Life** (1970) - The original cellular automaton
