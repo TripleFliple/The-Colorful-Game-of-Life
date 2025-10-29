@@ -17,8 +17,8 @@ Watch simple patterns explode into complex, ever-changing color wars. It's hypno
 - **Color Expansion Rate**: Adjustable stagnation threshold (1-300 generations) that controls how quickly moving cells spawn and color conversion happens
 
 ### Drawing Tools
-- **9 Color Palette**: Click any color to paint cells on the canvas
-- **5x5 Circular Eraser**: Large eraser with visual red circle indicator that follows your mouse
+- **9 Color Palette**: Click any color swatch to paint cells on the canvas
+- **Multi-Size Eraser**: Cycles through 5x5 → 25x25 → 51x51 → OFF with visual red circle indicator (fills when actively erasing)
 - **Line Tool**: Draw straight lines between two points
 - **Rectangle Tool**: Draw hollow rectangles
 - **Oval Tool**: Draw hollow ovals/ellipses
@@ -27,14 +27,14 @@ Watch simple patterns explode into complex, ever-changing color wars. It's hypno
 ### Customization
 - **Adjustable Rules**: Modify birth, survival, evolution, and death neighbor counts
 - **Canvas Sizing**: Choose from preset sizes or create custom dimensions (50-500 cells)
-- **Speed Control**: Adjust simulation speed from 1-20 generations per second
+- **Speed Control**: Adjust simulation speed from 1-30 generations per second
 - **Toggle Features**: Turn Moving Cells and Neighbors Fight on/off independently
 
 ## 🕹️ How to Use
 
 ### Getting Started
 1. **Open the HTML file** in any modern web browser (Chrome, Firefox, Safari, Edge)
-2. **Click a color button** to select your drawing color
+2. **Click a color swatch** from the palette to select your drawing color
 3. **Click or drag on the canvas** to place cells
 4. **Press Play (▶)** to watch the simulation run
 5. **Experiment!** Try different patterns, colors, and settings
@@ -45,11 +45,15 @@ Watch simple patterns explode into complex, ever-changing color wars. It's hypno
 - **Play/Pause**: Start or stop the simulation
 - **Step**: Advance one generation at a time
 - **Clear**: Erase the entire canvas
-- **Speed Slider**: Control how fast generations advance
+- **Random**: Fill canvas with random white cells
+- **Speed Slider**: Control how fast generations advance (1-30)
 
 #### Drawing Tools
-- **Color Buttons**: Select from 9 colors (shows live cell count)
-- **Eraser Tool**: Click to activate, then drag to erase cells
+- **Color Swatches**: Select from 9 colors in the palette above the controls
+- **Eraser Tool**: Click to cycle through sizes (5x5 → 25x25 → 51x51 → OFF)
+  - Red outline shows eraser size
+  - Fills red when actively erasing (mouse/touch down)
+  - Click through all sizes to turn off
 - **Line Tool**: Click start point, then end point
 - **Rectangle Tool**: Click one corner, then opposite corner
 - **Oval Tool**: Click one corner, then opposite corner
@@ -67,15 +71,15 @@ Watch simple patterns explode into complex, ever-changing color wars. It's hypno
 ### For Beginners
 1. **Start Simple**: Draw a small cluster of one color and press Play
 2. **Try Classic Patterns**: Draw a glider, blinker, or block from classic Game of Life
-3. **Watch the Numbers**: The color buttons show live cell counts—watch them change!
-4. **Use the Eraser**: The 5x5 circular eraser with red outline makes cleanup easy
+3. **Use the Eraser**: Multi-size eraser with visual feedback makes editing easy
+4. **Watch the Generation Counter**: See how fast your patterns evolve
 
 ### For Experimentation
 1. **Fast Chaos**: Set Color Expansion Rate to 50 for rapid moving cell spawns and quick color wars
 2. **Slow Evolution**: Set Color Expansion Rate to 200 for stable, gradual changes
 3. **Color Battles**: Turn on BOTH Moving Cells + Neighbors Fight for epic warfare
 4. **Pure Life**: Turn OFF both features for classic Conway's Life behavior (with colors)
-5. **Mobile Test**: Use the Mobile (100x150) button for phone-friendly canvas size
+5. **Mobile Friendly**: Canvas automatically adjusts to 100x150 on mobile devices
 
 ### Cool Patterns to Try
 - **Rainbow Collision**: Draw lines of different colors pointing at each other
@@ -115,14 +119,15 @@ When enabled, stagnant colored cells (Red through Magenta):
 
 The game works great on mobile devices!
 - **Touch Controls**: Tap and drag to draw
-- **Mobile Button**: Quick preset for 100x150 canvas (optimized for phones)
+- **Auto-Detection**: Canvas automatically sizes to 100x150 on mobile
 - **Responsive**: All controls work with touch input
+- **Eraser Feedback**: Red filled circle appears when actively erasing with touch
 - **Zoom**: Use zoom to see details on small screens
 
 ## 🐛 Troubleshooting
 
 **Game runs too fast/slow:**
-- Adjust the Speed slider (1-20)
+- Adjust the Speed slider (1-30)
 - Higher values = faster generations
 
 **Want classic Conway's Life:**
@@ -131,15 +136,15 @@ The game works great on mobile devices!
 - Reset Rules to Default
 
 **Canvas too small/large:**
-- Use Mobile button for 100x150
-- Or set custom size with Width/Height dropdowns
+- Mobile devices auto-detect and use 100x150
+- Desktop: set custom size with Width/Height dropdowns
 - Click "Apply Size" after changes
 
 **Eraser not working:**
 - Click the Eraser button to activate (it should highlight)
-- Look for the red circle that follows your mouse
-- Drag across cells to erase
-- Click Eraser again to deactivate and return to drawing
+- Look for the red circle that follows your mouse/finger
+- Circle fills red when actively erasing
+- Click through all sizes (5x5 → 25x25 → 51x51) to turn off
 
 **Moving cells not spawning:**
 - Check that "Moving Cells: ON" is active
@@ -154,6 +159,7 @@ The game works great on mobile devices!
 - **Moving Cells**: Tracked separately with position, direction, color, and age
 - **Stagnation Timer**: Tracks how long each cell has been unchanged
 - **Touch Events**: Full mobile support with touch handling
+- **Responsive Design**: Color palette adapts for mobile screens
 
 ## 📜 Credits
 
@@ -178,7 +184,7 @@ Just keep the spirit of discovery and wonder alive! 🌟
 ## 🚀 Quick Start Guide
 
 1. **Open the HTML file** in your browser
-2. **Click a tool** (try oval)
+2. **Click a color swatch** from the palette
 3. **Draw some cells** on the canvas
 4. **Press Play ▶**
 5. **Watch the magic happen** ✨
