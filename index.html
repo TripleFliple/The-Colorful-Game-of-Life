@@ -530,6 +530,47 @@
         let ovalStartPoint = null; // First point of oval
         let previewOvalEnd = null; // Current mouse position for oval preview
         let eraserCursorPos = null; // Track mouse position for eraser cursor {x, y} in grid coords
+        let eraserSize = 0; // 0 = off, 1 = 5x5 (radius 2.5), 2 = 25x25 (radius 12.5), 3 = 51x51 (radius 25.5)
+        
+        // Erase cells in a circular area based on eraser size
+        function eraseCircularArea(x, y) {
+            let radius;
+            if (eraserSize === 1) {
+                radius = 2.5;
+            } else if (eraserSize === 2) {
+                radius = 12.5;
+            } else if (eraserSize === 3) {
+                radius = 25.5;
+            } else {
+                return; // No erasing if eraserSize is 0
+            }
+            
+            const minX = Math.floor(x - radius);
+            const maxX = Math.ceil(x + radius);
+            const minY = Math.floor(y - radius);
+            const maxY = Math.ceil(y + radius);
+            
+            for (let dy = minY; dy <= maxY; dy++) {
+                for (let dx = minX; dx <= maxX; dx++) {
+                    const distance = Math.sqrt((dx - x) * (dx - x) + (dy - y) * (dy - y));
+                    if (distance <= radius) {
+                        const nx = dx;
+                        const ny = dy;
+                        if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
+                            grid[ny][nx] = 0;
+                        }
+                    }
+                }
+            }
+            
+            // Also remove any moving cells in the eraser area
+            movingCells = movingCells.filter(cell => {
+                const dx = cell.x - x;
+                const dy = cell.y - y;
+                const distance = Math.sqrt(dx * dx + dy * dy);
+                return distance > radius;
+            });
+        }
         
         // Initialize grid
         function initGrid() {
@@ -634,8 +675,8 @@
                 ctx.stroke();
             }
             
-            // Draw eraser cursor - 5x5 circle with red outline
-            if (eraserMode && eraserCursorPos) {
+            // Draw eraser cursor - circle with red outline matching current eraser size
+            if (eraserMode && eraserCursorPos && eraserSize > 0) {
                 ctx.strokeStyle = '#ff0000'; // Red outline
                 ctx.lineWidth = 2;
                 
@@ -643,8 +684,15 @@
                 const centerScreenX = (eraserCursorPos.x - viewOffsetX) * effectiveCellSize + effectiveCellSize / 2;
                 const centerScreenY = (eraserCursorPos.y - viewOffsetY) * effectiveCellSize + effectiveCellSize / 2;
                 
-                // Radius for 5x5 circle (2.5 cells)
-                const radius = 2.5 * effectiveCellSize;
+                // Radius based on eraser size: 1=2.5 cells, 2=12.5 cells, 3=25.5 cells
+                let radius;
+                if (eraserSize === 1) {
+                    radius = 2.5 * effectiveCellSize;
+                } else if (eraserSize === 2) {
+                    radius = 12.5 * effectiveCellSize;
+                } else if (eraserSize === 3) {
+                    radius = 25.5 * effectiveCellSize;
+                }
                 
                 ctx.beginPath();
                 ctx.arc(centerScreenX, centerScreenY, radius, 0, 2 * Math.PI);
@@ -1404,27 +1452,7 @@
             if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
                 if (!lastCell || lastCell.x !== x || lastCell.y !== y) {
                     if (eraserMode) {
-                        // Erase 5x5 circular area
-                        for (let dy = -2; dy <= 2; dy++) {
-                            for (let dx = -2; dx <= 2; dx++) {
-                                // Check if point is within circle radius of 2.5
-                                const distance = Math.sqrt(dx * dx + dy * dy);
-                                if (distance <= 2.5) {
-                                    const nx = x + dx;
-                                    const ny = y + dy;
-                                    if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
-                                        grid[ny][nx] = 0;
-                                    }
-                                }
-                            }
-                        }
-                        // Also remove any moving cells in the eraser area
-                        movingCells = movingCells.filter(cell => {
-                            const dx = cell.x - x;
-                            const dy = cell.y - y;
-                            const distance = Math.sqrt(dx * dx + dy * dy);
-                            return distance > 2.5;
-                        });
+                        eraseCircularArea(x, y);
                     } else {
                         // If cell is occupied, erase it; otherwise draw with selected color
                         grid[y][x] = grid[y][x] !== 0 ? 0 : selectedColor;
@@ -1562,27 +1590,7 @@
                     } else {
                         // Normal drawing mode
                         if (eraserMode) {
-                            // Erase 5x5 circular area
-                            for (let dy = -2; dy <= 2; dy++) {
-                                for (let dx = -2; dx <= 2; dx++) {
-                                    // Check if point is within circle radius of 2.5
-                                    const distance = Math.sqrt(dx * dx + dy * dy);
-                                    if (distance <= 2.5) {
-                                        const nx = x + dx;
-                                        const ny = y + dy;
-                                        if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
-                                            grid[ny][nx] = 0;
-                                        }
-                                    }
-                                }
-                            }
-                            // Also remove any moving cells in the eraser area
-                            movingCells = movingCells.filter(cell => {
-                                const dx = cell.x - x;
-                                const dy = cell.y - y;
-                                const distance = Math.sqrt(dx * dx + dy * dy);
-                                return distance > 2.5;
-                            });
+                            eraseCircularArea(x, y);
                         } else {
                             // If cell is occupied, erase it; otherwise draw with selected color
                             grid[y][x] = grid[y][x] !== 0 ? 0 : selectedColor;
@@ -1606,27 +1614,7 @@
             if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
                 if (!lastTouchCell || lastTouchCell.x !== x || lastTouchCell.y !== y) {
                     if (eraserMode) {
-                        // Erase 5x5 circular area
-                        for (let dy = -2; dy <= 2; dy++) {
-                            for (let dx = -2; dx <= 2; dx++) {
-                                // Check if point is within circle radius of 2.5
-                                const distance = Math.sqrt(dx * dx + dy * dy);
-                                if (distance <= 2.5) {
-                                    const nx = x + dx;
-                                    const ny = y + dy;
-                                    if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
-                                        grid[ny][nx] = 0;
-                                    }
-                                }
-                            }
-                        }
-                        // Also remove any moving cells in the eraser area
-                        movingCells = movingCells.filter(cell => {
-                            const dx = cell.x - x;
-                            const dy = cell.y - y;
-                            const distance = Math.sqrt(dx * dx + dy * dy);
-                            return distance > 2.5;
-                        });
+                        eraseCircularArea(x, y);
                     } else {
                         // If cell is occupied, erase it; otherwise draw with selected color
                         grid[y][x] = grid[y][x] !== 0 ? 0 : selectedColor;
@@ -1703,6 +1691,7 @@
             deactivateZoom();
             deactivateRectangleTool();
             deactivateOvalTool();
+            deactivateEraser();
             lineToolActive = !lineToolActive;
             this.textContent = lineToolActive ? 'Line Tool: ON' : 'Line Tool: OFF';
             this.classList.toggle('active');
@@ -1718,6 +1707,7 @@
             deactivateZoom();
             deactivateLineTool();
             deactivateOvalTool();
+            deactivateEraser();
             rectangleToolActive = !rectangleToolActive;
             this.textContent = rectangleToolActive ? 'Rectangle Tool: ON' : 'Rectangle Tool: OFF';
             this.classList.toggle('active');
@@ -1733,6 +1723,7 @@
             deactivateZoom();
             deactivateLineTool();
             deactivateRectangleTool();
+            deactivateEraser();
             ovalToolActive = !ovalToolActive;
             this.textContent = ovalToolActive ? 'Oval Tool: ON' : 'Oval Tool: OFF';
             this.classList.toggle('active');
@@ -1745,6 +1736,7 @@
         });
         
         document.getElementById('zoomButton').addEventListener('click', function() {
+            deactivateEraser();
             zoomMode = (zoomMode + 1) % 3; // Cycle through 0, 1, 2
             
             if (zoomMode === 0) {
@@ -1819,6 +1811,20 @@
             }
         }
         
+        // Function to deactivate eraser
+        function deactivateEraser() {
+            if (eraserMode) {
+                eraserMode = false;
+                eraserSize = 0;
+                eraserCursorPos = null;
+                canvas.classList.remove('eraser-cursor');
+                const eraserButton = document.getElementById('eraserButton');
+                eraserButton.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser';
+                eraserButton.classList.remove('active');
+                drawGrid();
+            }
+        }
+        
         // Color selection buttons
         document.querySelectorAll('.color-button').forEach(button => {
             button.addEventListener('click', function() {
@@ -1830,12 +1836,16 @@
                 
                 // Check if eraser button was clicked
                 if (this.id === 'eraserButton') {
-                    if (eraserMode) {
-                        // Deactivate eraser, restore previous color
+                    // Cycle through eraser sizes: 0 (off) -> 1 (5x5) -> 2 (25x25) -> 3 (51x51) -> 0 (off)
+                    eraserSize = (eraserSize + 1) % 4;
+                    
+                    if (eraserSize === 0) {
+                        // Deactivate eraser
                         eraserMode = false;
                         eraserCursorPos = null;
                         canvas.classList.remove('eraser-cursor');
                         this.classList.remove('active');
+                        this.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser';
                         
                         // Reactivate the previous color button
                         const previousColorButton = document.querySelector(`[data-color="${previousColor}"]`);
@@ -1843,22 +1853,40 @@
                             previousColorButton.classList.add('active');
                         }
                         selectedColor = previousColor;
-                        drawGrid(); // Redraw to remove cursor
+                        drawGrid();
                     } else {
-                        // Activate eraser
-                        eraserMode = true;
-                        // Save current color
-                        previousColor = selectedColor;
+                        // Activate eraser with specific size
+                        if (!eraserMode) {
+                            // First time activating eraser, save current color
+                            previousColor = selectedColor;
+                            eraserMode = true;
+                            // Remove active from all color buttons
+                            document.querySelectorAll('.color-button').forEach(b => b.classList.remove('active'));
+                        }
                         
-                        // Remove active from all buttons and activate eraser
-                        document.querySelectorAll('.color-button').forEach(b => b.classList.remove('active'));
                         this.classList.add('active');
+                        
+                        // Update button text based on size
+                        if (eraserSize === 1) {
+                            this.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser (5x5)';
+                        } else if (eraserSize === 2) {
+                            this.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser (25x25)';
+                        } else if (eraserSize === 3) {
+                            this.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser (51x51)';
+                        }
                     }
                 } else {
-                    // Color button clicked
+                    // Color button clicked - deactivate eraser
                     eraserMode = false;
+                    eraserSize = 0;
                     eraserCursorPos = null;
                     canvas.classList.remove('eraser-cursor');
+                    
+                    // Reset eraser button
+                    const eraserButton = document.getElementById('eraserButton');
+                    eraserButton.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser';
+                    eraserButton.classList.remove('active');
+                    
                     // Remove active class from all buttons
                     document.querySelectorAll('.color-button').forEach(b => b.classList.remove('active'));
                     // Add active class to clicked button
