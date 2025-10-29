@@ -186,6 +186,58 @@
             align-items: center;
             gap: 10px;
         }
+        
+        .rules-section {
+            margin: 20px 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            max-width: 800px;
+        }
+        
+        .rule-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+            gap: 8px;
+        }
+        
+        .rule-title {
+            font-weight: bold;
+            font-size: 14px;
+            color: #fff;
+            margin: 0;
+        }
+        
+        .rule-sliders {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .rule-sliders .slider-container {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .rule-sliders input[type="range"] {
+            width: 100px;
+        }
+        
+        .capped-highlight {
+            color: #ff6b6b !important;
+            font-weight: bold;
+            animation: pulse 0.5s ease-in-out;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
     </style>
 </head>
 <body>
@@ -193,7 +245,7 @@
     
     <canvas id="canvas"></canvas>
     <div class="canvas-info">
-        Generation: <span id="generation">0</span> | Zoom: <span id="zoomDisplay">1.00x</span> | Menus ⬇️
+        Generation: <span id="generation">0</span> | Zoom: <span id="zoomDisplay">1.00x</span> | Tools/Settings ⬇️
     </div>
     
     <!-- Row 1: Play/Pause, Step, Clear, Eraser, Zoom -->
@@ -219,19 +271,19 @@
     <div class="controls">
         <div class="slider-container">
             <label>Speed:</label>
-            <input type="range" id="speed" min="1" max="20" value="5">
-            <span id="speedValue">5</span>
+            <input type="range" id="speed" min="1" max="20" value="10">
+            <span id="speedValue">10</span>
         </div>
-        <button id="toggleNeighborsFight">Neighbors Fight: OFF</button>
+        <button id="toggleNeighborsFight" class="active">Neighbors Fight: ON</button>
         <button id="toggleMovingCells" class="active">Moving Cells: ON</button>
     </div>
     
-    <!-- Row 3.5: Rainbow Wars Slider and Mobile Button -->
+    <!-- Row 3.5: Color Expansion Slider and Mobile Button -->
     <div class="controls">
         <div class="slider-container">
-            <label>Rainbow Wars Rate:</label>
-            <input type="range" id="rainbowWarsRate" min="1" max="300" value="100">
-            <span id="rainbowWarsValue">100</span>
+            <label>Color Expansion (every 1-300 steps):</label>
+            <input type="range" id="colorExpansionRate" min="1" max="300" value="100">
+            <span id="colorExpansionValue">100</span>
         </div>
         <button id="sizeMobile">Mobile (100x150)</button>
     </div>
@@ -310,59 +362,74 @@
         </button>
     </div>
     
+    <!-- Cellular Automaton Rules Section -->
     <div class="controls">
         <label>Cellular Automaton Rules:</label>
     </div>
     
-    <div class="controls">
-        <label>Birth (Neighbors):</label>
-        <div class="slider-container">
-            <label>Min:</label>
-            <input type="range" id="birthMin" min="0" max="8" value="3">
-            <span id="birthMinValue">3</span>
+    <div class="rules-section">
+        <!-- Birth Rule -->
+        <div class="rule-group">
+            <div class="rule-title">Birth (Neighbors):</div>
+            <div class="rule-sliders">
+                <div class="slider-container">
+                    <label>Min:</label>
+                    <input type="range" id="birthMin" min="0" max="8" value="3">
+                    <span id="birthMinValue">3</span>
+                </div>
+                <div class="slider-container">
+                    <label>Max:</label>
+                    <input type="range" id="birthMax" min="0" max="8" value="3">
+                    <span id="birthMaxValue">3</span>
+                </div>
+            </div>
         </div>
-        <div class="slider-container">
-            <label>Max:</label>
-            <input type="range" id="birthMax" min="0" max="8" value="3">
-            <span id="birthMaxValue">3</span>
+        
+        <!-- Survival Rule -->
+        <div class="rule-group">
+            <div class="rule-title">Survival (Neighbors):</div>
+            <div class="rule-sliders">
+                <div class="slider-container">
+                    <label>Min:</label>
+                    <input type="range" id="survivalMin" min="0" max="8" value="2">
+                    <span id="survivalMinValue">2</span>
+                </div>
+                <div class="slider-container">
+                    <label>Max:</label>
+                    <input type="range" id="survivalMax" min="0" max="8" value="3">
+                    <span id="survivalMaxValue">3</span>
+                </div>
+            </div>
         </div>
-    </div>
-    
-    <div class="controls">
-        <label>Survival (Neighbors):</label>
-        <div class="slider-container">
-            <label>Min:</label>
-            <input type="range" id="survivalMin" min="0" max="8" value="2">
-            <span id="survivalMinValue">2</span>
+        
+        <!-- Evolution Rule -->
+        <div class="rule-group">
+            <div class="rule-title">Evolution (Neighbors):</div>
+            <div class="rule-sliders">
+                <div class="slider-container">
+                    <label>Min:</label>
+                    <input type="range" id="evolutionMin" min="1" max="8" value="4">
+                    <span id="evolutionMinValue">4</span>
+                </div>
+                <div class="slider-container">
+                    <label>Max:</label>
+                    <input type="range" id="evolutionMax" min="1" max="8" value="4">
+                    <span id="evolutionMaxValue">4</span>
+                </div>
+            </div>
         </div>
-        <div class="slider-container">
-            <label>Max:</label>
-            <input type="range" id="survivalMax" min="0" max="8" value="3">
-            <span id="survivalMaxValue">3</span>
-        </div>
-    </div>
-    
-    <div class="controls">
-        <label>Evolution (Neighbors):</label>
-        <div class="slider-container">
-            <label>Min:</label>
-            <input type="range" id="evolutionMin" min="1" max="8" value="4">
-            <span id="evolutionMinValue">4</span>
-        </div>
-        <div class="slider-container">
-            <label>Max:</label>
-            <input type="range" id="evolutionMax" min="1" max="8" value="4">
-            <span id="evolutionMaxValue">4</span>
-        </div>
-    </div>
-    
-    <div class="controls">
-        <label>Death (Overpopulation):</label>
-        <div class="slider-container">
-            <label>At:</label>
-            <input type="range" id="deathMin" min="1" max="8" value="5">
-            <span id="deathMinValue">5</span>
-            <span style="margin-left: 5px;">+ neighbors</span>
+        
+        <!-- Death Rule -->
+        <div class="rule-group">
+            <div class="rule-title">Death (Overpopulation):</div>
+            <div class="rule-sliders">
+                <div class="slider-container">
+                    <label>At:</label>
+                    <input type="range" id="deathMin" min="1" max="8" value="5">
+                    <span id="deathMinValue">5</span>
+                    <span style="margin-left: 5px;">+ neighbors</span>
+                </div>
+            </div>
         </div>
     </div>
     
@@ -378,9 +445,9 @@
             <li><strong>Death:</strong> Cells die with &lt;2 neighbors (isolation) or 5+ neighbors (overpopulation, default: 5+, adjustable)</li>
             <li><strong>Evolution:</strong> Cells with 4 neighbors evolve to next color (default: 4-4, adjustable)</li>
             <li><strong>Magenta Special:</strong> Magenta cells in evolution range spawn moving white spore then die (with Moving Cells ON) or evolve to white (OFF)</li>
-            <li><strong>Rainbow Wars Rate:</strong> Controls stagnation threshold (1-300 generations, default: 100). Affects both Moving Cells spawning and Neighbors Fight conversion speed. Lower = faster action, higher = more stability.</li>
-            <li><strong>Moving Cells (Toggleable):</strong> When ON, stagnant cells (3+ same-color neighbors unchanged for Rainbow Wars Rate) spawn moving cells. Moving cells travel outward (70% straight/30% turn), pass through other movers, and after 4+ frames: stop on same color or convert entire groups of different colors.</li>
-            <li><strong>Neighbors Fight (Toggleable):</strong> When ON, stagnant colored cells (red-magenta) convert adjacent lower-colored neighbors to match their color after Rainbow Wars Rate generations. Creates color wars and territory expansion.</li>
+            <li><strong>Color Expansion Rate:</strong> Controls stagnation threshold (1-300 generations, default: 100). Affects both Moving Cells spawning and Neighbors Fight conversion speed. Lower = faster action, higher = more stability.</li>
+            <li><strong>Moving Cells (Toggleable):</strong> When ON, stagnant cells (3+ same-color neighbors unchanged for Color Expansion Rate) spawn moving cells. Moving cells travel outward (70% straight/30% turn), pass through other movers, and after 4+ frames: stop on same color or convert entire groups of different colors.</li>
+            <li><strong>Neighbors Fight (Toggleable):</strong> When ON, stagnant colored cells (red-magenta) convert adjacent lower-colored neighbors to match their color after Color Expansion Rate generations. Creates color wars and territory expansion.</li>
             <li><strong>Color Hierarchy:</strong> White → Red → Orange → Yellow → Green → Cyan → Blue → Purple → Magenta → (spawns White spore)</li>
         </ul>
         <h3>Drawing Tools:</h3>
@@ -394,7 +461,7 @@
             <li><strong>Mobile Button:</strong> Quick preset for 100x150 canvas (mobile-friendly size)</li>
             <li><strong>Canvas Size:</strong> Custom width/height with dropdowns (50-500 cells). Click "Apply Size" to rebuild grid.</li>
         </ul>
-        <p><strong>Tip:</strong> Try Rainbow Wars Rate at 50 for fast chaos, 200 for slow evolution! Combine Neighbors Fight + Moving Cells for epic color battles!</p>
+        <p><strong>Tip:</strong> Try Color Expansion Rate at 50 for fast chaos, 200 for slow evolution! Combine Neighbors Fight + Moving Cells for epic color battles!</p>
     </div>
 
     <script>
@@ -415,7 +482,7 @@
         let EVOLUTION_MIN_NEIGHBORS = 4;
         let EVOLUTION_MAX_NEIGHBORS = 4;
         let DEATH_MIN_NEIGHBORS = 5; // Death occurs at this many neighbors or more
-        let RAINBOW_WARS_RATE = 100; // Rate for stagnant cell spawning/neighbor fighting
+        let COLOR_EXPANSION_RATE = 100; // Rate for stagnant cell spawning/neighbor fighting
         
         // Cell states
         const CELL_EMPTY = 0;
@@ -1079,9 +1146,9 @@
                 for (let x = 0; x < GRID_WIDTH; x++) {
                     const cell = newGrid[y][x];
                     
-                    // Any colored cell (including white) with 3+ neighbors of same color spawns moving cell after Rainbow Wars Rate
+                    // Any colored cell (including white) with 3+ neighbors of same color spawns moving cell after Color Expansion Rate
                     // Only if moving cells are enabled
-                    if (movingCellsEnabled && cell >= 1 && cell <= 9 && newStagnationTimers[y][x] >= RAINBOW_WARS_RATE) {
+                    if (movingCellsEnabled && cell >= 1 && cell <= 9 && newStagnationTimers[y][x] >= COLOR_EXPANSION_RATE) {
                         const sameColorNeighbors = countNeighbors(x, y, cell);
                         if (sameColorNeighbors >= 3) {
                             // Find an empty neighbor to spawn the moving cell
@@ -1109,7 +1176,7 @@
                     }
                     
                     // Colored cells (not white) that are stagnant do color conversion if Neighbors Fight is enabled
-                    if (neighborsFightEnabled && cell >= 2 && cell <= 9 && newStagnationTimers[y][x] >= RAINBOW_WARS_RATE) {
+                    if (neighborsFightEnabled && cell >= 2 && cell <= 9 && newStagnationTimers[y][x] >= COLOR_EXPANSION_RATE) {
                         // Check all neighbors
                         for (let dy = -1; dy <= 1; dy++) {
                             for (let dx = -1; dx <= 1; dx++) {
@@ -1211,316 +1278,6 @@
             drawGrid();
         }
         
-        // Pattern generators for interesting reactions
-        function loadRainbowCollision() {
-            clearGrid();
-            const cx = Math.floor(GRID_WIDTH / 2);
-            const cy = Math.floor(GRID_HEIGHT / 2);
-            
-            // Create vertical stripes of different colors converging toward center
-            for (let i = 0; i < 7; i++) {
-                const color = i + 2; // Red through Purple (2-8)
-                const startX = Math.floor(i * GRID_WIDTH / 8);
-                const endX = Math.floor((i + 1) * GRID_WIDTH / 8);
-                
-                for (let x = startX; x < endX; x++) {
-                    for (let y = 0; y < GRID_HEIGHT; y++) {
-                        if (Math.random() > 0.7) {
-                            grid[y][x] = color;
-                        }
-                    }
-                }
-            }
-        }
-        
-        function loadCornerWars() {
-            clearGrid();
-            const size = 20;
-            
-            // Top-left: White
-            for (let y = 0; y < size; y++) {
-                for (let x = 0; x < size; x++) {
-                    if (Math.random() > 0.3) grid[y][x] = 1;
-                }
-            }
-            
-            // Top-right: Magenta
-            for (let y = 0; y < size; y++) {
-                for (let x = GRID_WIDTH - size; x < GRID_WIDTH; x++) {
-                    if (Math.random() > 0.3) grid[y][x] = 9;
-                }
-            }
-            
-            // Bottom-left: Cyan
-            for (let y = GRID_HEIGHT - size; y < GRID_HEIGHT; y++) {
-                for (let x = 0; x < size; x++) {
-                    if (Math.random() > 0.3) grid[y][x] = 6;
-                }
-            }
-            
-            // Bottom-right: Orange
-            for (let y = GRID_HEIGHT - size; y < GRID_HEIGHT; y++) {
-                for (let x = GRID_WIDTH - size; x < GRID_WIDTH; x++) {
-                    if (Math.random() > 0.3) grid[y][x] = 3;
-                }
-            }
-        }
-        
-        function loadColorSpiral() {
-            clearGrid();
-            const cx = Math.floor(GRID_WIDTH / 2);
-            const cy = Math.floor(GRID_HEIGHT / 2);
-            
-            // Create a spiral of alternating colors
-            let angle = 0;
-            let radius = 2;
-            let color = 1;
-            
-            while (radius < Math.min(GRID_WIDTH, GRID_HEIGHT) / 2) {
-                for (let i = 0; i < 20; i++) {
-                    const x = cx + Math.floor(radius * Math.cos(angle));
-                    const y = cy + Math.floor(radius * Math.sin(angle));
-                    
-                    if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
-                        // Create small cluster
-                        for (let dy = -2; dy <= 2; dy++) {
-                            for (let dx = -2; dx <= 2; dx++) {
-                                const nx = x + dx;
-                                const ny = y + dy;
-                                if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT && Math.random() > 0.4) {
-                                    grid[ny][nx] = color;
-                                }
-                            }
-                        }
-                    }
-                    
-                    angle += 0.3;
-                    radius += 0.5;
-                }
-                
-                color = (color % 9) + 1; // Cycle through colors
-            }
-        }
-        
-        function loadConcentricRings() {
-            clearGrid();
-            const cx = Math.floor(GRID_WIDTH / 2);
-            const cy = Math.floor(GRID_HEIGHT / 2);
-            
-            // Create concentric rings of different colors
-            for (let radius = 10; radius < Math.min(GRID_WIDTH, GRID_HEIGHT) / 2; radius += 10) {
-                const color = Math.floor((radius / 10) % 9) + 1;
-                
-                for (let angle = 0; angle < Math.PI * 2; angle += 0.1) {
-                    const x = cx + Math.floor(radius * Math.cos(angle));
-                    const y = cy + Math.floor(radius * Math.sin(angle));
-                    
-                    if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
-                        // Create thick ring
-                        for (let dy = -2; dy <= 2; dy++) {
-                            for (let dx = -2; dx <= 2; dx++) {
-                                const nx = x + dx;
-                                const ny = y + dy;
-                                if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT && Math.random() > 0.3) {
-                                    grid[ny][nx] = color;
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        function loadCheckerboard() {
-            clearGrid();
-            const blockSize = 15;
-            
-            for (let by = 0; by < Math.ceil(GRID_HEIGHT / blockSize); by++) {
-                for (let bx = 0; bx < Math.ceil(GRID_WIDTH / blockSize); bx++) {
-                    const color = ((bx + by) % 8) + 2; // Cycle through colors 2-9
-                    
-                    for (let y = by * blockSize; y < Math.min((by + 1) * blockSize, GRID_HEIGHT); y++) {
-                        for (let x = bx * blockSize; x < Math.min((bx + 1) * blockSize, GRID_WIDTH); x++) {
-                            if (Math.random() > 0.3) {
-                                grid[y][x] = color;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        
-        // Stable structures
-        function loadStableBlock() {
-            clearGrid();
-            const cx = Math.floor(GRID_WIDTH / 2);
-            const cy = Math.floor(GRID_HEIGHT / 2);
-            
-            // 2x2 block (stable with 3 neighbors each)
-            grid[cy][cx] = 5;     // Green
-            grid[cy][cx+1] = 5;
-            grid[cy+1][cx] = 5;
-            grid[cy+1][cx+1] = 5;
-            
-            // Add surrounding blocks at different distances
-            const offsets = [
-                {dx: -10, dy: -10, color: 2},
-                {dx: 10, dy: -10, color: 4},
-                {dx: -10, dy: 10, color: 6},
-                {dx: 10, dy: 10, color: 8}
-            ];
-            
-            offsets.forEach(off => {
-                const bx = cx + off.dx;
-                const by = cy + off.dy;
-                grid[by][bx] = off.color;
-                grid[by][bx+1] = off.color;
-                grid[by+1][bx] = off.color;
-                grid[by+1][bx+1] = off.color;
-            });
-        }
-        
-        function loadOscillator() {
-            clearGrid();
-            const cx = Math.floor(GRID_WIDTH / 2);
-            const cy = Math.floor(GRID_HEIGHT / 2);
-            
-            // Blinker pattern (3 in a row) - oscillates between horizontal and vertical
-            // Using red
-            grid[cy][cx-1] = 2;
-            grid[cy][cx] = 2;
-            grid[cy][cx+1] = 2;
-            
-            // Add more oscillators in different colors
-            grid[cy-10][cx-1] = 4; // Yellow blinker
-            grid[cy-10][cx] = 4;
-            grid[cy-10][cx+1] = 4;
-            
-            grid[cy+10][cx-1] = 6; // Cyan blinker
-            grid[cy+10][cx] = 6;
-            grid[cy+10][cx+1] = 6;
-            
-            // Toad pattern (2x3) - 2-period oscillator
-            grid[cy][cx+10] = 3;
-            grid[cy][cx+11] = 3;
-            grid[cy][cx+12] = 3;
-            grid[cy+1][cx+9] = 3;
-            grid[cy+1][cx+10] = 3;
-            grid[cy+1][cx+11] = 3;
-        }
-        
-        function loadSymmetricFlower() {
-            clearGrid();
-            const cx = Math.floor(GRID_WIDTH / 2);
-            const cy = Math.floor(GRID_HEIGHT / 2);
-            
-            // Create a flower-like symmetrical pattern
-            // Center core
-            grid[cy][cx] = 9; // Magenta center
-            
-            // 8-way symmetry petals
-            const petalPattern = [
-                [0, -1], [0, -2], [0, -3], // North
-                [1, -1], [2, -2], // NE
-                [1, 0], [2, 0], [3, 0],   // East
-                [1, 1], [2, 2],   // SE
-                [0, 1], [0, 2], [0, 3],   // South
-                [-1, 1], [-2, 2], // SW
-                [-1, 0], [-2, 0], [-3, 0], // West
-                [-1, -1], [-2, -2] // NW
-            ];
-            
-            let color = 1;
-            let colorChange = 0;
-            petalPattern.forEach((pos, i) => {
-                if (i % 3 === 0 && i > 0) color = (color % 9) + 1;
-                grid[cy + pos[1]][cx + pos[0]] = color;
-            });
-        }
-        
-        function loadDiamond() {
-            clearGrid();
-            const cx = Math.floor(GRID_WIDTH / 2);
-            const cy = Math.floor(GRID_HEIGHT / 2);
-            
-            // Create diamond patterns with different colors
-            const sizes = [5, 10, 15, 20];
-            const colors = [2, 4, 6, 8];
-            
-            sizes.forEach((size, idx) => {
-                const color = colors[idx];
-                
-                // Draw hollow diamond
-                for (let i = 0; i < size; i++) {
-                    // Top half
-                    grid[cy - size + i][cx - i] = color;
-                    grid[cy - size + i][cx + i] = color;
-                    
-                    // Bottom half
-                    grid[cy + i][cx - (size - i)] = color;
-                    grid[cy + i][cx + (size - i)] = color;
-                }
-            });
-        }
-        
-        function loadColorTower() {
-            clearGrid();
-            const cx = Math.floor(GRID_WIDTH / 2);
-            const startY = 20;
-            
-            // Create vertical tower with color gradient
-            for (let i = 0; i < 9; i++) {
-                const color = i + 1;
-                const y = startY + (i * 12);
-                
-                // Create stable 4x4 block for each color
-                for (let dy = 0; dy < 4; dy++) {
-                    for (let dx = 0; dx < 4; dx++) {
-                        if (y + dy < GRID_HEIGHT) {
-                            grid[y + dy][cx - 2 + dx] = color;
-                        }
-                    }
-                }
-            }
-        }
-        
-        function loadSpinwheel() {
-            clearGrid();
-            const cx = Math.floor(GRID_WIDTH / 2);
-            const cy = Math.floor(GRID_HEIGHT / 2);
-            
-            // Create a pinwheel/spinwheel pattern with rotational symmetry
-            const armLength = 15;
-            const colors = [2, 4, 6, 8]; // Red, Yellow, Cyan, Purple
-            
-            for (let arm = 0; arm < 4; arm++) {
-                const angle = (arm * Math.PI / 2); // 90 degree increments
-                const color = colors[arm];
-                
-                for (let dist = 3; dist < armLength; dist++) {
-                    const x = cx + Math.floor(dist * Math.cos(angle));
-                    const y = cy + Math.floor(dist * Math.sin(angle));
-                    
-                    // Create thick arm with perpendicular extension
-                    for (let perp = -1; perp <= 1; perp++) {
-                        const perpX = Math.floor(perp * Math.sin(angle));
-                        const perpY = Math.floor(-perp * Math.cos(angle));
-                        
-                        if (x + perpX >= 0 && x + perpX < GRID_WIDTH && 
-                            y + perpY >= 0 && y + perpY < GRID_HEIGHT) {
-                            grid[y + perpY][x + perpX] = color;
-                        }
-                    }
-                }
-            }
-            
-            // Add central core
-            for (let dy = -1; dy <= 1; dy++) {
-                for (let dx = -1; dx <= 1; dx++) {
-                    grid[cy + dy][cx + dx] = 9; // Magenta center
-                }
-            }
-        }
         
         // Mouse events
         canvas.addEventListener('mousedown', (e) => {
@@ -1937,10 +1694,10 @@
             }
         });
         
-        document.getElementById('rainbowWarsRate').addEventListener('input', (e) => {
+        document.getElementById('colorExpansionRate').addEventListener('input', (e) => {
             deactivateZoom();
-            RAINBOW_WARS_RATE = parseInt(e.target.value);
-            document.getElementById('rainbowWarsValue').textContent = RAINBOW_WARS_RATE;
+            COLOR_EXPANSION_RATE = parseInt(e.target.value);
+            document.getElementById('colorExpansionValue').textContent = COLOR_EXPANSION_RATE;
         });
         
         document.getElementById('lineToolButton').addEventListener('click', function() {
@@ -2127,6 +1884,13 @@
             if (newMin > BIRTH_MAX_NEIGHBORS) {
                 newMin = BIRTH_MAX_NEIGHBORS;
                 e.target.value = newMin;
+                
+                // Highlight the max value that's capping us
+                const birthMaxValue = document.getElementById('birthMaxValue');
+                birthMaxValue.classList.add('capped-highlight');
+                setTimeout(() => {
+                    birthMaxValue.classList.remove('capped-highlight');
+                }, 500);
             }
             BIRTH_MIN_NEIGHBORS = newMin;
             document.getElementById('birthMinValue').textContent = newMin;
@@ -2138,6 +1902,13 @@
             if (newMax < BIRTH_MIN_NEIGHBORS) {
                 newMax = BIRTH_MIN_NEIGHBORS;
                 e.target.value = newMax;
+                
+                // Highlight the min value that's capping us
+                const birthMinValue = document.getElementById('birthMinValue');
+                birthMinValue.classList.add('capped-highlight');
+                setTimeout(() => {
+                    birthMinValue.classList.remove('capped-highlight');
+                }, 500);
             }
             BIRTH_MAX_NEIGHBORS = newMax;
             document.getElementById('birthMaxValue').textContent = newMax;
@@ -2150,6 +1921,13 @@
             if (newMin > SURVIVAL_MAX_NEIGHBORS) {
                 newMin = SURVIVAL_MAX_NEIGHBORS;
                 e.target.value = newMin;
+                
+                // Highlight the max value that's capping us
+                const survivalMaxValue = document.getElementById('survivalMaxValue');
+                survivalMaxValue.classList.add('capped-highlight');
+                setTimeout(() => {
+                    survivalMaxValue.classList.remove('capped-highlight');
+                }, 500);
             }
             SURVIVAL_MIN_NEIGHBORS = newMin;
             document.getElementById('survivalMinValue').textContent = newMin;
@@ -2158,10 +1936,33 @@
         document.getElementById('survivalMax').addEventListener('input', (e) => {
             deactivateZoom();
             let newMax = parseInt(e.target.value);
+            let wasCapped = false;
+            
             if (newMax < SURVIVAL_MIN_NEIGHBORS) {
                 newMax = SURVIVAL_MIN_NEIGHBORS;
                 e.target.value = newMax;
+                
+                // Highlight the min value that's capping us
+                const survivalMinValue = document.getElementById('survivalMinValue');
+                survivalMinValue.classList.add('capped-highlight');
+                setTimeout(() => {
+                    survivalMinValue.classList.remove('capped-highlight');
+                }, 500);
             }
+            // Survival max cannot exceed death threshold
+            if (newMax >= DEATH_MIN_NEIGHBORS) {
+                newMax = DEATH_MIN_NEIGHBORS - 1;
+                e.target.value = newMax;
+                wasCapped = true;
+                
+                // Highlight the death value that's capping us
+                const deathValue = document.getElementById('deathMinValue');
+                deathValue.classList.add('capped-highlight');
+                setTimeout(() => {
+                    deathValue.classList.remove('capped-highlight');
+                }, 500);
+            }
+            
             SURVIVAL_MAX_NEIGHBORS = newMax;
             document.getElementById('survivalMaxValue').textContent = newMax;
         });
@@ -2173,6 +1974,13 @@
             if (newMin > EVOLUTION_MAX_NEIGHBORS) {
                 newMin = EVOLUTION_MAX_NEIGHBORS;
                 e.target.value = newMin;
+                
+                // Highlight the max value that's capping us
+                const evolutionMaxValue = document.getElementById('evolutionMaxValue');
+                evolutionMaxValue.classList.add('capped-highlight');
+                setTimeout(() => {
+                    evolutionMaxValue.classList.remove('capped-highlight');
+                }, 500);
             }
             EVOLUTION_MIN_NEIGHBORS = newMin;
             document.getElementById('evolutionMinValue').textContent = newMin;
@@ -2184,6 +1992,13 @@
             if (newMax < EVOLUTION_MIN_NEIGHBORS) {
                 newMax = EVOLUTION_MIN_NEIGHBORS;
                 e.target.value = newMax;
+                
+                // Highlight the min value that's capping us
+                const evolutionMinValue = document.getElementById('evolutionMinValue');
+                evolutionMinValue.classList.add('capped-highlight');
+                setTimeout(() => {
+                    evolutionMinValue.classList.remove('capped-highlight');
+                }, 500);
             }
             EVOLUTION_MAX_NEIGHBORS = newMax;
             document.getElementById('evolutionMaxValue').textContent = newMax;
@@ -2200,11 +2015,32 @@
         document.getElementById('deathMin').addEventListener('input', (e) => {
             deactivateZoom();
             let newMin = parseInt(e.target.value);
+            
             // Death must be above evolution max
             if (newMin <= EVOLUTION_MAX_NEIGHBORS) {
                 newMin = EVOLUTION_MAX_NEIGHBORS + 1;
                 e.target.value = newMin;
+                
+                // Highlight the evolution value that's capping us
+                const evolutionValue = document.getElementById('evolutionMaxValue');
+                evolutionValue.classList.add('capped-highlight');
+                setTimeout(() => {
+                    evolutionValue.classList.remove('capped-highlight');
+                }, 500);
             }
+            // Death must be above survival max
+            else if (newMin <= SURVIVAL_MAX_NEIGHBORS) {
+                newMin = SURVIVAL_MAX_NEIGHBORS + 1;
+                e.target.value = newMin;
+                
+                // Highlight the survival value that's capping us
+                const survivalValue = document.getElementById('survivalMaxValue');
+                survivalValue.classList.add('capped-highlight');
+                setTimeout(() => {
+                    survivalValue.classList.remove('capped-highlight');
+                }, 500);
+            }
+            
             DEATH_MIN_NEIGHBORS = newMin;
             document.getElementById('deathMinValue').textContent = newMin;
         });
@@ -2242,10 +2078,10 @@
             document.getElementById('deathMin').value = 5;
             document.getElementById('deathMinValue').textContent = 5;
             
-            // Rainbow Wars Rate: 100
-            RAINBOW_WARS_RATE = 100;
-            document.getElementById('rainbowWarsRate').value = 100;
-            document.getElementById('rainbowWarsValue').textContent = 100;
+            // Color Expansion Rate: 100
+            COLOR_EXPANSION_RATE = 100;
+            document.getElementById('colorExpansionRate').value = 100;
+            document.getElementById('colorExpansionValue').textContent = 100;
         });
         
         // Size preset buttons
