@@ -278,19 +278,18 @@
         <button id="toggleMovingCells" class="active">Moving Cells: ON</button>
     </div>
     
-    <!-- Row 3.5: Color Expansion Slider and Mobile Button -->
+    <!-- Row 3.5: Color Expansion Slider -->
     <div class="controls">
         <div class="slider-container">
             <label>Color Expansion (every 1-300 steps):</label>
             <input type="range" id="colorExpansionRate" min="1" max="300" value="100">
             <span id="colorExpansionValue">100</span>
         </div>
-        <button id="sizeMobile">Mobile (100x150)</button>
     </div>
     
     <!-- Row 4: Custom Canvas Settings -->
     <div class="controls">
-        <label>Canvas Size:</label>
+        <label>Canvas Size (desktop only):</label>
         <div class="slider-container">
             <label>Width:</label>
             <select id="canvasWidth">
@@ -2084,27 +2083,7 @@
             document.getElementById('colorExpansionValue').textContent = 100;
         });
         
-        // Size preset buttons
-        document.getElementById('sizeMobile').addEventListener('click', function() {
-            deactivateZoom();
-            document.getElementById('canvasWidth').value = '100';
-            document.getElementById('canvasHeight').value = '150';
-            
-            GRID_WIDTH = 100;
-            GRID_HEIGHT = 150;
-            
-            // Reset zoom to 1 if current zoom is below new minimum
-            const minZoom = getMinZoomLevel();
-            if (zoomLevel < minZoom) {
-                zoomLevel = 1;
-                viewOffsetX = 0;
-                viewOffsetY = 0;
-            }
-            
-            initGrid();
-            resizeCanvas();
-            drawGrid();
-        });
+        // Size preset buttons removed - mobile size is auto-detected
         
         document.getElementById('applyCanvasSize').addEventListener('click', function() {
             deactivateZoom();
