@@ -271,8 +271,8 @@
     <div class="controls">
         <div class="slider-container">
             <label>Speed:</label>
-            <input type="range" id="speed" min="1" max="20" value="10">
-            <span id="speedValue">10</span>
+            <input type="range" id="speed" min="1" max="30" value="20">
+            <span id="speedValue">20</span>
         </div>
         <button id="toggleNeighborsFight" class="active">Neighbors Fight: ON</button>
         <button id="toggleMovingCells" class="active">Moving Cells: ON</button>
@@ -289,7 +289,7 @@
     
     <!-- Row 4: Custom Canvas Settings -->
     <div class="controls">
-        <label>Canvas Size (desktop only):</label>
+        <label>Canvas Size:</label>
         <div class="slider-container">
             <label>Width:</label>
             <select id="canvasWidth">
@@ -471,7 +471,7 @@
         let CELL_SIZE = 4;
         let GRID_WIDTH = 200;
         let GRID_HEIGHT = 150;
-        let SPEED = 5;
+        let SPEED = 20;
         
         // Rule parameters (adjustable)
         let BIRTH_MIN_NEIGHBORS = 3;
