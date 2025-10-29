@@ -52,6 +52,37 @@
             align-items: center;
         }
         
+        .color-palette {
+            margin: 15px 0;
+            display: flex;
+            gap: 6px;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .color-swatch {
+            width: 35px;
+            height: 35px;
+            border: 3px solid #444;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+        }
+        
+        .color-swatch:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+        
+        .color-swatch.active {
+            border: 3px solid #fff;
+            box-shadow: 0 0 15px rgba(255,255,255,0.6);
+            transform: scale(1.15);
+        }
+        
         button {
             padding: 10px 20px;
             background: #2a2a2a;
@@ -84,32 +115,6 @@
             border-radius: 8px;
             max-width: 800px;
             line-height: 1.6;
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr); /* Force exactly 2 columns */
-            gap: 8px;
-            margin: 10px 0;
-            font-size: 14px;
-            max-width: 800px;
-        }
-        
-        .stat {
-            padding: 6px 10px;
-            background: #2a2a2a;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            min-width: 190px; /* Fixed minimum width */
-            font-size: 12px;
-        }
-        
-        .stat span {
-            display: inline-block;
-            min-width: 25px;
-            text-align: right;
         }
         
         .canvas-info {
@@ -146,20 +151,6 @@
             background: #4a4a4a;
             border-color: #888;
             box-shadow: 0 0 10px rgba(255,255,255,0.3);
-        }
-        
-        .color-indicator {
-            width: 12px;
-            height: 12px;
-            border-radius: 2px;
-            display: inline-block;
-        }
-        
-        .color-button .count,
-        .color-button .moving-count {
-            display: inline-block;
-            min-width: 20px;
-            text-align: right;
         }
         
         select, input[type="range"] {
@@ -238,6 +229,23 @@
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.2); }
         }
+        
+        /* Mobile-specific styles */
+        @media (max-width: 480px) {
+            .color-swatch {
+                width: 30px;
+                height: 30px;
+                border: 2px solid #444;
+            }
+            
+            .color-swatch.active {
+                border: 2px solid #fff;
+            }
+            
+            .color-palette {
+                gap: 4px;
+            }
+        }
     </style>
 </head>
 <body>
@@ -246,6 +254,19 @@
     <canvas id="canvas"></canvas>
     <div class="canvas-info">
         Generation: <span id="generation">0</span> | Zoom: <span id="zoomDisplay">1.00x</span> | Tools/Settings ⬇️
+    </div>
+    
+    <!-- Color Palette Row -->
+    <div class="color-palette">
+        <button class="color-swatch active" data-color="1" id="colorWhite" style="background: white; border: 2px solid #666;"></button>
+        <button class="color-swatch" data-color="2" id="colorRed" style="background: #ff0000;"></button>
+        <button class="color-swatch" data-color="3" id="colorOrange" style="background: #ff8800;"></button>
+        <button class="color-swatch" data-color="4" id="colorYellow" style="background: #ffff00;"></button>
+        <button class="color-swatch" data-color="5" id="colorGreen" style="background: #00ff00;"></button>
+        <button class="color-swatch" data-color="6" id="colorCyan" style="background: #00ffff;"></button>
+        <button class="color-swatch" data-color="7" id="colorBlue" style="background: #0088ff;"></button>
+        <button class="color-swatch" data-color="8" id="colorPurple" style="background: #8800ff;"></button>
+        <button class="color-swatch" data-color="9" id="colorMagenta" style="background: #ff00ff;"></button>
     </div>
     
     <!-- Row 1: Play/Pause, Step, Clear, Eraser, Zoom -->
@@ -289,7 +310,7 @@
     
     <!-- Row 4: Custom Canvas Settings -->
     <div class="controls">
-        <label>Canvas Size (desktop only):</label>
+        <label>Canvas Size:</label>
         <div class="slider-container">
             <label>Width:</label>
             <select id="canvasWidth">
@@ -320,45 +341,6 @@
             </select>
         </div>
         <button id="applyCanvasSize">Apply Size</button>
-    </div>
-    
-    <div class="stats" id="stats">
-        <button class="color-button active" data-color="1" id="colorWhite">
-            <span class="color-indicator" style="background: white;"></span> 
-            White: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
-        </button>
-        <button class="color-button" data-color="2" id="colorRed">
-            <span class="color-indicator" style="background: #ff0000;"></span> 
-            Red: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
-        </button>
-        <button class="color-button" data-color="3" id="colorOrange">
-            <span class="color-indicator" style="background: #ff8800;"></span> 
-            Orange: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
-        </button>
-        <button class="color-button" data-color="4" id="colorYellow">
-            <span class="color-indicator" style="background: #ffff00;"></span> 
-            Yellow: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
-        </button>
-        <button class="color-button" data-color="5" id="colorGreen">
-            <span class="color-indicator" style="background: #00ff00;"></span> 
-            Green: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
-        </button>
-        <button class="color-button" data-color="6" id="colorCyan">
-            <span class="color-indicator" style="background: #00ffff;"></span> 
-            Cyan: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
-        </button>
-        <button class="color-button" data-color="7" id="colorBlue">
-            <span class="color-indicator" style="background: #0088ff;"></span> 
-            Blue: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
-        </button>
-        <button class="color-button" data-color="8" id="colorPurple">
-            <span class="color-indicator" style="background: #8800ff;"></span> 
-            Purple: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
-        </button>
-        <button class="color-button" data-color="9" id="colorMagenta">
-            <span class="color-indicator" style="background: #ff00ff;"></span> 
-            Magenta: <span class="count">0</span> (moving: <span class="moving-count">0</span>)
-        </button>
     </div>
     
     <!-- Cellular Automaton Rules Section -->
@@ -451,14 +433,13 @@
         </ul>
         <h3>Drawing Tools:</h3>
         <ul>
-            <li><strong>Color Selection:</strong> Click any color button, then click/drag on canvas to draw cells</li>
-            <li><strong>Eraser:</strong> Clears cells in a 5x5 area around your click</li>
+            <li><strong>Color Selection:</strong> Click any color swatch above the controls to select a drawing color, then click/drag on canvas to draw cells</li>
+            <li><strong>Eraser:</strong> Cycles through 5x5 → 25x25 → 51x51 → OFF. Red circle shows eraser size, fills when actively erasing</li>
             <li><strong>Line Tool:</strong> Click start point, move mouse (red preview line), click end point to draw straight line</li>
             <li><strong>Rectangle Tool:</strong> Click corner, move mouse (red preview box), click opposite corner to draw rectangle outline</li>
             <li><strong>Oval Tool:</strong> Click corner, move mouse (red preview ellipse), click opposite corner to draw oval outline</li>
             <li><strong>Zoom:</strong> Cycles through OFF → IN (click to zoom in) → OUT (click to zoom out) → OFF. Auto-limited to prevent black space based on canvas size.</li>
-            <li><strong>Mobile Button:</strong> Quick preset for 100x150 canvas (mobile-friendly size)</li>
-            <li><strong>Canvas Size:</strong> Custom width/height with dropdowns (50-500 cells). Click "Apply Size" to rebuild grid.</li>
+            <li><strong>Canvas Size:</strong> Custom width/height with dropdowns (50-500 cells). Click "Apply Size" to rebuild grid. Mobile devices auto-detect and use 100x150.</li>
         </ul>
         <p><strong>Tip:</strong> Try Color Expansion Rate at 50 for fast chaos, 200 for slow evolution! Combine Neighbors Fight + Moving Cells for epic color battles!</p>
     </div>
@@ -531,6 +512,7 @@
         let previewOvalEnd = null; // Current mouse position for oval preview
         let eraserCursorPos = null; // Track mouse position for eraser cursor {x, y} in grid coords
         let eraserSize = 0; // 0 = off, 1 = 5x5 (radius 2.5), 2 = 25x25 (radius 12.5), 3 = 51x51 (radius 25.5)
+        let eraserActive = false; // Track if eraser is currently being used (mouse/touch down)
         
         // Erase cells in a circular area based on eraser size
         function eraseCircularArea(x, y) {
@@ -677,9 +659,6 @@
             
             // Draw eraser cursor - circle with red outline matching current eraser size
             if (eraserMode && eraserCursorPos && eraserSize > 0) {
-                ctx.strokeStyle = '#ff0000'; // Red outline
-                ctx.lineWidth = 2;
-                
                 // Center of cursor is at the grid cell position
                 const centerScreenX = (eraserCursorPos.x - viewOffsetX) * effectiveCellSize + effectiveCellSize / 2;
                 const centerScreenY = (eraserCursorPos.y - viewOffsetY) * effectiveCellSize + effectiveCellSize / 2;
@@ -694,6 +673,17 @@
                     radius = 25.5 * effectiveCellSize;
                 }
                 
+                // If actively erasing, draw filled red circle
+                if (eraserActive) {
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.3)'; // Semi-transparent red fill
+                    ctx.beginPath();
+                    ctx.arc(centerScreenX, centerScreenY, radius, 0, 2 * Math.PI);
+                    ctx.fill();
+                }
+                
+                // Always draw the outline
+                ctx.strokeStyle = '#ff0000'; // Red outline
+                ctx.lineWidth = 2;
                 ctx.beginPath();
                 ctx.arc(centerScreenX, centerScreenY, radius, 0, 2 * Math.PI);
                 ctx.stroke();
@@ -1255,44 +1245,8 @@
         
         // Update statistics
         function updateStats() {
-            const counts = Array(10).fill(0);
-            const movingCounts = Array(10).fill(0);
-            
-            // Count stationary cells
-            for (let y = 0; y < GRID_HEIGHT; y++) {
-                for (let x = 0; x < GRID_WIDTH; x++) {
-                    counts[grid[y][x]]++;
-                }
-            }
-            
-            // Count moving cells by color
-            movingCells.forEach(cell => {
-                const color = cell.color || 1;
-                movingCounts[color]++;
-            });
-            
             document.getElementById('generation').textContent = generation;
             document.getElementById('zoomDisplay').textContent = zoomLevel.toFixed(2) + 'x';
-            
-            // Update color button counts
-            document.querySelector('#colorWhite .count').textContent = counts[1];
-            document.querySelector('#colorWhite .moving-count').textContent = movingCounts[1];
-            document.querySelector('#colorRed .count').textContent = counts[2];
-            document.querySelector('#colorRed .moving-count').textContent = movingCounts[2];
-            document.querySelector('#colorOrange .count').textContent = counts[3];
-            document.querySelector('#colorOrange .moving-count').textContent = movingCounts[3];
-            document.querySelector('#colorYellow .count').textContent = counts[4];
-            document.querySelector('#colorYellow .moving-count').textContent = movingCounts[4];
-            document.querySelector('#colorGreen .count').textContent = counts[5];
-            document.querySelector('#colorGreen .moving-count').textContent = movingCounts[5];
-            document.querySelector('#colorCyan .count').textContent = counts[6];
-            document.querySelector('#colorCyan .moving-count').textContent = movingCounts[6];
-            document.querySelector('#colorBlue .count').textContent = counts[7];
-            document.querySelector('#colorBlue .moving-count').textContent = movingCounts[7];
-            document.querySelector('#colorPurple .count').textContent = counts[8];
-            document.querySelector('#colorPurple .moving-count').textContent = movingCounts[8];
-            document.querySelector('#colorMagenta .count').textContent = counts[9];
-            document.querySelector('#colorMagenta .moving-count').textContent = movingCounts[9];
         }
         
         // Game loop
@@ -1410,27 +1364,8 @@
                         // Normal drawing mode
                         mouseDown = true;
                         if (eraserMode) {
-                            // Erase 5x5 circular area
-                            for (let dy = -2; dy <= 2; dy++) {
-                                for (let dx = -2; dx <= 2; dx++) {
-                                    // Check if point is within circle radius of 2.5
-                                    const distance = Math.sqrt(dx * dx + dy * dy);
-                                    if (distance <= 2.5) {
-                                        const nx = x + dx;
-                                        const ny = y + dy;
-                                        if (nx >= 0 && nx < GRID_WIDTH && ny >= 0 && ny < GRID_HEIGHT) {
-                                            grid[ny][nx] = 0;
-                                        }
-                                    }
-                                }
-                            }
-                            // Also remove any moving cells in the eraser area
-                            movingCells = movingCells.filter(cell => {
-                                const dx = cell.x - x;
-                                const dy = cell.y - y;
-                                const distance = Math.sqrt(dx * dx + dy * dy);
-                                return distance > 2.5;
-                            });
+                            eraserActive = true;
+                            eraseCircularArea(x, y);
                         } else {
                             // If cell is occupied, erase it; otherwise draw with selected color
                             grid[y][x] = grid[y][x] !== 0 ? 0 : selectedColor;
@@ -1452,6 +1387,7 @@
             if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
                 if (!lastCell || lastCell.x !== x || lastCell.y !== y) {
                     if (eraserMode) {
+                        eraserActive = true;
                         eraseCircularArea(x, y);
                     } else {
                         // If cell is occupied, erase it; otherwise draw with selected color
@@ -1507,6 +1443,9 @@
             canvas.classList.remove('eraser-cursor');
             mouseDown = false;
             lastCell = null;
+            if (eraserActive) {
+                eraserActive = false;
+            }
             if (eraserMode) {
                 drawGrid(); // Redraw to remove cursor
             }
@@ -1590,6 +1529,8 @@
                     } else {
                         // Normal drawing mode
                         if (eraserMode) {
+                            eraserActive = true;
+                            eraserCursorPos = {x, y}; // Set cursor position for visual feedback
                             eraseCircularArea(x, y);
                         } else {
                             // If cell is occupied, erase it; otherwise draw with selected color
@@ -1614,6 +1555,8 @@
             if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
                 if (!lastTouchCell || lastTouchCell.x !== x || lastTouchCell.y !== y) {
                     if (eraserMode) {
+                        eraserActive = true;
+                        eraserCursorPos = {x, y}; // Set cursor position for visual feedback
                         eraseCircularArea(x, y);
                     } else {
                         // If cell is occupied, erase it; otherwise draw with selected color
@@ -1628,11 +1571,20 @@
         canvas.addEventListener('touchend', (e) => {
             e.preventDefault();
             lastTouchCell = null;
+            if (eraserActive) {
+                eraserActive = false;
+                eraserCursorPos = null; // Clear cursor position
+                drawGrid(); // Redraw to remove the filled circle
+            }
         });
         
         canvas.addEventListener('mouseup', () => {
             mouseDown = false;
             lastCell = null;
+            if (eraserActive) {
+                eraserActive = false;
+                drawGrid(); // Redraw to remove the filled circle
+            }
         });
         
         // Control events
@@ -1825,78 +1777,73 @@
             }
         }
         
-        // Color selection buttons
-        document.querySelectorAll('.color-button').forEach(button => {
+        // Color swatch selection
+        document.querySelectorAll('.color-swatch').forEach(button => {
             button.addEventListener('click', function() {
-                // Deactivate zoom and all drawing tools when color/eraser button is clicked
+                // Deactivate zoom and all drawing tools when color is selected
                 deactivateZoom();
                 deactivateLineTool();
                 deactivateRectangleTool();
                 deactivateOvalTool();
+                deactivateEraser();
                 
-                // Check if eraser button was clicked
-                if (this.id === 'eraserButton') {
-                    // Cycle through eraser sizes: 0 (off) -> 1 (5x5) -> 2 (25x25) -> 3 (51x51) -> 0 (off)
-                    eraserSize = (eraserSize + 1) % 4;
-                    
-                    if (eraserSize === 0) {
-                        // Deactivate eraser
-                        eraserMode = false;
-                        eraserCursorPos = null;
-                        canvas.classList.remove('eraser-cursor');
-                        this.classList.remove('active');
-                        this.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser';
-                        
-                        // Reactivate the previous color button
-                        const previousColorButton = document.querySelector(`[data-color="${previousColor}"]`);
-                        if (previousColorButton) {
-                            previousColorButton.classList.add('active');
-                        }
-                        selectedColor = previousColor;
-                        drawGrid();
-                    } else {
-                        // Activate eraser with specific size
-                        if (!eraserMode) {
-                            // First time activating eraser, save current color
-                            previousColor = selectedColor;
-                            eraserMode = true;
-                            // Remove active from all color buttons
-                            document.querySelectorAll('.color-button').forEach(b => b.classList.remove('active'));
-                        }
-                        
-                        this.classList.add('active');
-                        
-                        // Update button text based on size
-                        if (eraserSize === 1) {
-                            this.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser (5x5)';
-                        } else if (eraserSize === 2) {
-                            this.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser (25x25)';
-                        } else if (eraserSize === 3) {
-                            this.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser (51x51)';
-                        }
-                    }
-                } else {
-                    // Color button clicked - deactivate eraser
-                    eraserMode = false;
-                    eraserSize = 0;
-                    eraserCursorPos = null;
-                    canvas.classList.remove('eraser-cursor');
-                    
-                    // Reset eraser button
-                    const eraserButton = document.getElementById('eraserButton');
-                    eraserButton.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser';
-                    eraserButton.classList.remove('active');
-                    
-                    // Remove active class from all buttons
-                    document.querySelectorAll('.color-button').forEach(b => b.classList.remove('active'));
-                    // Add active class to clicked button
-                    this.classList.add('active');
-                    // Set selected color
-                    selectedColor = parseInt(this.getAttribute('data-color'));
-                    previousColor = selectedColor; // Update previous color
-                    drawGrid(); // Redraw to remove cursor if it was showing
-                }
+                // Remove active class from all swatches
+                document.querySelectorAll('.color-swatch').forEach(b => b.classList.remove('active'));
+                // Add active class to clicked swatch
+                this.classList.add('active');
+                // Set selected color
+                selectedColor = parseInt(this.getAttribute('data-color'));
+                previousColor = selectedColor; // Update previous color
             });
+        });
+        
+        // Eraser button (separate from color swatches)
+        document.getElementById('eraserButton').addEventListener('click', function() {
+            // Deactivate zoom and all drawing tools when eraser is clicked
+            deactivateZoom();
+            deactivateLineTool();
+            deactivateRectangleTool();
+            deactivateOvalTool();
+            
+            // Cycle through eraser sizes: 0 (off) -> 1 (5x5) -> 2 (25x25) -> 3 (51x51) -> 0 (off)
+            eraserSize = (eraserSize + 1) % 4;
+            
+            if (eraserSize === 0) {
+                // Deactivate eraser
+                eraserMode = false;
+                eraserCursorPos = null;
+                canvas.classList.remove('eraser-cursor');
+                this.classList.remove('active');
+                this.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser';
+                
+                // Reactivate the previous color swatch
+                const previousColorSwatch = document.querySelector(`.color-swatch[data-color="${previousColor}"]`);
+                if (previousColorSwatch) {
+                    previousColorSwatch.classList.add('active');
+                }
+                selectedColor = previousColor;
+                drawGrid();
+            } else {
+                // Activate eraser with specific size
+                if (!eraserMode) {
+                    // First time activating eraser, save current color
+                    previousColor = selectedColor;
+                    eraserMode = true;
+                    // Remove active from all color swatches
+                    document.querySelectorAll('.color-swatch').forEach(b => b.classList.remove('active'));
+                }
+                
+                this.classList.add('active');
+                
+                // Update button text based on size
+                if (eraserSize === 1) {
+                    this.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser (5x5)';
+                } else if (eraserSize === 2) {
+                    this.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser (25x25)';
+                } else if (eraserSize === 3) {
+                    this.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser (51x51)';
+                }
+            }
         });
         
         document.getElementById('speed').addEventListener('input', (e) => {
