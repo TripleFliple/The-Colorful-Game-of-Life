@@ -83,6 +83,38 @@
             transform: scale(1.15);
         }
         
+        .tool-button {
+            width: 35px;
+            height: 35px;
+            border: 3px solid #444;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            flex-shrink: 0;
+            background: #2a2a2a;
+            color: #fff;
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            min-height: unset;
+        }
+        
+        .tool-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            background: #3a3a3a;
+        }
+        
+        .tool-button.active {
+            border: 3px solid #fff;
+            box-shadow: 0 0 15px rgba(255,255,255,0.6);
+            transform: scale(1.15);
+            background: #4a4a4a;
+        }
+        
         button {
             padding: 10px 20px;
             background: #2a2a2a;
@@ -232,13 +264,13 @@
         
         /* Mobile-specific styles */
         @media (max-width: 480px) {
-            .color-swatch {
+            .color-swatch, .tool-button {
                 width: 30px;
                 height: 30px;
                 border: 2px solid #444;
             }
             
-            .color-swatch.active {
+            .color-swatch.active, .tool-button.active {
                 border: 2px solid #fff;
             }
             
@@ -267,6 +299,10 @@
         <button class="color-swatch" data-color="7" id="colorBlue" style="background: #0088ff;"></button>
         <button class="color-swatch" data-color="8" id="colorPurple" style="background: #8800ff;"></button>
         <button class="color-swatch" data-color="9" id="colorMagenta" style="background: #ff00ff;"></button>
+        <button class="tool-button" id="lineToolButton" title="Line Tool">╱</button>
+        <button class="tool-button" id="rectangleToolButton" title="Rectangle Tool">▢</button>
+        <button class="tool-button" id="ovalToolButton" title="Oval Tool">⬭</button>
+        <button class="tool-button" id="randomButton" title="Random">🎲</button>
     </div>
     
     <!-- Row 1: Play/Pause, Step, Clear, Eraser, Zoom -->
@@ -280,26 +316,18 @@
         <button id="zoomButton">Zoom: OFF</button>
     </div>
     
-    <!-- Row 2: Line Tool, Rectangle Tool, Oval Tool, Random -->
-    <div class="controls">
-        <button id="lineToolButton">Line Tool: OFF</button>
-        <button id="rectangleToolButton">Rectangle Tool: OFF</button>
-        <button id="ovalToolButton">Oval Tool: OFF</button>
-        <button id="random">Random</button>
-    </div>
-    
-    <!-- Row 3: Speed, Neighbors Fight, Moving Cells -->
+    <!-- Row 2: Speed, Neighbors Fight, Moving Cells -->
     <div class="controls">
         <div class="slider-container">
             <label>Speed:</label>
             <input type="range" id="speed" min="1" max="30" value="20">
             <span id="speedValue">20</span>
         </div>
-        <button id="toggleNeighborsFight">Neighbors Fight: OFF</button>
+        <button id="toggleNeighborsFight" class="active">Neighbors Fight: ON</button>
         <button id="toggleMovingCells" class="active">Moving Cells: ON</button>
     </div>
     
-    <!-- Row 3.5: Color Expansion Slider -->
+    <!-- Row 3: Color Expansion Slider -->
     <div class="controls">
         <div class="slider-container">
             <label>Color Expansion (every 1-300 steps):</label>
@@ -310,7 +338,7 @@
     
     <!-- Row 4: Custom Canvas Settings -->
     <div class="controls">
-        <label>Canvas Size:</label>
+        <label>Canvas Size (desktop only):</label>
         <div class="slider-container">
             <label>Width:</label>
             <select id="canvasWidth">
@@ -428,7 +456,7 @@
             <li><strong>Magenta Special:</strong> Magenta cells in evolution range spawn moving white spore then die (with Moving Cells ON) or evolve to white (OFF)</li>
             <li><strong>Color Expansion Rate:</strong> Controls stagnation threshold (1-300 generations, default: 100). Affects both Moving Cells spawning and Neighbors Fight conversion speed. Lower = faster action, higher = more stability.</li>
             <li><strong>Moving Cells (Toggleable):</strong> When ON, stagnant cells (3+ same-color neighbors unchanged for Color Expansion Rate) spawn moving cells. Moving cells travel outward (70% straight/30% turn), pass through other movers, and after 4+ frames: stop on same color or convert entire groups of different colors.</li>
-            <li><strong>Neighbors Fight (Toggleable):</strong> When ON, stagnant colored cells (red-magenta) convert adjacent lower-colored neighbors to match their color after Color Expansion Rate generations. Creates color wars and territory expansion.</li>
+            <li><strong>Neighbors Fight (Toggleable):</strong> When ON, stagnant cells of a higher-color will convert adjacent lower-colored neighbors. This occurs based on the Color Expansion Rate (1-300 steps). This can break stagnation and create color battles or territory expansion.</li>
             <li><strong>Color Hierarchy:</strong> White → Red → Orange → Yellow → Green → Cyan → Blue → Purple → Magenta → (spawns White spore)</li>
         </ul>
         <h3>Drawing Tools:</h3>
@@ -499,7 +527,7 @@
         let viewOffsetX = 0; // Viewport offset for panning when zoomed
         let viewOffsetY = 0;
         let movingCellsEnabled = true; // Toggle for moving cells feature
-        let neighborsFightEnabled = false; // Toggle for neighbors fight feature
+        let neighborsFightEnabled = true; // Toggle for neighbors fight feature (ON by default)
         let zoomMode = 0; // 0 = normal, 1 = zoom in mode, 2 = zoom out mode
         let lineToolActive = false; // Toggle for line drawing tool
         let lineStartPoint = null; // First point of line
@@ -1309,12 +1337,12 @@
                     
                     drawGrid();
                 } else if (zoomMode === 2) {
-                    // Zoom out mode
-                    const minZoom = getMinZoomLevel(); if (zoomLevel > minZoom) {
+                    // Zoom out mode - minimum zoom is 1.0 to prevent showing black space
+                    if (zoomLevel > 1.0) {
                         const gridX = x;
                         const gridY = y;
                         
-                        if (zoomLevel > 1) { zoomLevel = Math.max(1, zoomLevel - 1); } else { zoomLevel = Math.max(minZoom, zoomLevel - 0.25); }
+                        zoomLevel = Math.max(1.0, zoomLevel - 1);
                         
                         // Recenter view on the clicked position
                         const cellsVisibleX = Math.ceil(GRID_WIDTH / zoomLevel);
@@ -1481,12 +1509,12 @@
                     
                     drawGrid();
                 } else if (zoomMode === 2) {
-                    // Zoom out mode
-                    const minZoom = getMinZoomLevel(); if (zoomLevel > minZoom) {
+                    // Zoom out mode - minimum zoom is 1.0 to prevent showing black space
+                    if (zoomLevel > 1.0) {
                         const gridX = x;
                         const gridY = y;
                         
-                        if (zoomLevel > 1) { zoomLevel = Math.max(1, zoomLevel - 1); } else { zoomLevel = Math.max(minZoom, zoomLevel - 0.25); }
+                        zoomLevel = Math.max(1.0, zoomLevel - 1);
                         
                         // Recenter view on the clicked position
                         const cellsVisibleX = Math.ceil(GRID_WIDTH / zoomLevel);
@@ -1608,7 +1636,7 @@
             clearGrid();
         });
         
-        document.getElementById('random').addEventListener('click', () => {
+        document.getElementById('randomButton').addEventListener('click', () => {
             deactivateZoom();
             randomGrid();
         });
@@ -1645,7 +1673,6 @@
             deactivateOvalTool();
             deactivateEraser();
             lineToolActive = !lineToolActive;
-            this.textContent = lineToolActive ? 'Line Tool: ON' : 'Line Tool: OFF';
             this.classList.toggle('active');
             
             if (!lineToolActive) {
@@ -1661,7 +1688,6 @@
             deactivateOvalTool();
             deactivateEraser();
             rectangleToolActive = !rectangleToolActive;
-            this.textContent = rectangleToolActive ? 'Rectangle Tool: ON' : 'Rectangle Tool: OFF';
             this.classList.toggle('active');
             
             if (!rectangleToolActive) {
@@ -1677,7 +1703,6 @@
             deactivateRectangleTool();
             deactivateEraser();
             ovalToolActive = !ovalToolActive;
-            this.textContent = ovalToolActive ? 'Oval Tool: ON' : 'Oval Tool: OFF';
             this.classList.toggle('active');
             
             if (!ovalToolActive) {
@@ -1715,13 +1740,9 @@
         
         // Calculate minimum zoom level to fit entire canvas
         function getMinZoomLevel() {
-            const maxCanvasWidth = 800; // Max display width
-            const maxCanvasHeight = 600; // Max display height
-            
-            const zoomToFitWidth = maxCanvasWidth / (GRID_WIDTH * CELL_SIZE);
-            const zoomToFitHeight = maxCanvasHeight / (GRID_HEIGHT * CELL_SIZE);
-            
-            return Math.max(0.25, Math.min(zoomToFitWidth, zoomToFitHeight));
+            // Minimum zoom is 1.0 - this ensures we never zoom out to show black space
+            // beyond the canvas dimensions. At zoom level 1.0, the entire canvas is visible.
+            return 1.0;
         }
         
         // Function to deactivate line tool
@@ -1731,7 +1752,6 @@
                 lineStartPoint = null;
                 previewLineEnd = null;
                 const lineButton = document.getElementById('lineToolButton');
-                lineButton.textContent = 'Line Tool: OFF';
                 lineButton.classList.remove('active');
                 drawGrid(); // Redraw to clear preview line
             }
@@ -1744,7 +1764,6 @@
                 rectangleStartPoint = null;
                 previewRectangleEnd = null;
                 const rectButton = document.getElementById('rectangleToolButton');
-                rectButton.textContent = 'Rectangle Tool: OFF';
                 rectButton.classList.remove('active');
                 drawGrid();
             }
@@ -1757,7 +1776,6 @@
                 ovalStartPoint = null;
                 previewOvalEnd = null;
                 const ovalButton = document.getElementById('ovalToolButton');
-                ovalButton.textContent = 'Oval Tool: OFF';
                 ovalButton.classList.remove('active');
                 drawGrid();
             }
