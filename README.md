@@ -1,4 +1,4 @@
-# 🌈 The Colorful Game of Life
+# -The Game of Life Pro-
 
 ## 🎮 What Is This?
 
