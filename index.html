@@ -766,6 +766,63 @@
             }
         }
         
+        // Helper function to draw cells between two points (for smooth continuous drawing)
+        // Simply draws the color without toggling
+        function drawCellsBetween(x0, y0, x1, y1, color) {
+            const dx = Math.abs(x1 - x0);
+            const dy = Math.abs(y1 - y0);
+            const sx = x0 < x1 ? 1 : -1;
+            const sy = y0 < y1 ? 1 : -1;
+            let err = dx - dy;
+            
+            while (true) {
+                // Simply draw the color at each point
+                if (x0 >= 0 && x0 < GRID_WIDTH && y0 >= 0 && y0 < GRID_HEIGHT) {
+                    grid[y0][x0] = color;
+                }
+                
+                if (x0 === x1 && y0 === y1) break;
+                
+                const e2 = 2 * err;
+                if (e2 > -dy) {
+                    err -= dy;
+                    x0 += sx;
+                }
+                if (e2 < dx) {
+                    err += dx;
+                    y0 += sy;
+                }
+            }
+        }
+        
+        // Helper function to erase cells between two points (for smooth continuous erasing)
+        function eraseCellsBetween(x0, y0, x1, y1) {
+            const dx = Math.abs(x1 - x0);
+            const dy = Math.abs(y1 - y0);
+            const sx = x0 < x1 ? 1 : -1;
+            const sy = y0 < y1 ? 1 : -1;
+            let err = dx - dy;
+            
+            while (true) {
+                // Erase at each point along the line
+                if (x0 >= 0 && x0 < GRID_WIDTH && y0 >= 0 && y0 < GRID_HEIGHT) {
+                    eraseCircularArea(x0, y0);
+                }
+                
+                if (x0 === x1 && y0 === y1) break;
+                
+                const e2 = 2 * err;
+                if (e2 > -dy) {
+                    err -= dy;
+                    x0 += sx;
+                }
+                if (e2 < dx) {
+                    err += dx;
+                    y0 += sy;
+                }
+            }
+        }
+        
         // Draw rectangle outline (not filled)
         function drawRectangle(x0, y0, x1, y1, color) {
             const minX = Math.min(x0, x1);
@@ -1395,8 +1452,8 @@
                             eraserActive = true;
                             eraseCircularArea(x, y);
                         } else {
-                            // If cell is occupied, erase it; otherwise draw with selected color
-                            grid[y][x] = grid[y][x] !== 0 ? 0 : selectedColor;
+                            // Draw with selected color directly (no toggle)
+                            grid[y][x] = selectedColor;
                         }
                         lastCell = {x, y};
                         drawGrid();
@@ -1416,10 +1473,20 @@
                 if (!lastCell || lastCell.x !== x || lastCell.y !== y) {
                     if (eraserMode) {
                         eraserActive = true;
-                        eraseCircularArea(x, y);
+                        // Interpolate eraser between last position and current position
+                        if (lastCell) {
+                            eraseCellsBetween(lastCell.x, lastCell.y, x, y);
+                        } else {
+                            eraseCircularArea(x, y);
+                        }
                     } else {
-                        // If cell is occupied, erase it; otherwise draw with selected color
-                        grid[y][x] = grid[y][x] !== 0 ? 0 : selectedColor;
+                        // Interpolate drawing between last position and current position
+                        if (lastCell) {
+                            drawCellsBetween(lastCell.x, lastCell.y, x, y, selectedColor);
+                        } else {
+                            // First cell
+                            grid[y][x] = selectedColor;
+                        }
                     }
                     lastCell = {x, y};
                     drawGrid();
@@ -1561,8 +1628,8 @@
                             eraserCursorPos = {x, y}; // Set cursor position for visual feedback
                             eraseCircularArea(x, y);
                         } else {
-                            // If cell is occupied, erase it; otherwise draw with selected color
-                            grid[y][x] = grid[y][x] !== 0 ? 0 : selectedColor;
+                            // Draw with selected color directly (no toggle)
+                            grid[y][x] = selectedColor;
                         }
                         lastTouchCell = {x, y};
                         drawGrid();
@@ -1585,10 +1652,20 @@
                     if (eraserMode) {
                         eraserActive = true;
                         eraserCursorPos = {x, y}; // Set cursor position for visual feedback
-                        eraseCircularArea(x, y);
+                        // Interpolate eraser between last position and current position
+                        if (lastTouchCell) {
+                            eraseCellsBetween(lastTouchCell.x, lastTouchCell.y, x, y);
+                        } else {
+                            eraseCircularArea(x, y);
+                        }
                     } else {
-                        // If cell is occupied, erase it; otherwise draw with selected color
-                        grid[y][x] = grid[y][x] !== 0 ? 0 : selectedColor;
+                        // Interpolate drawing between last position and current position
+                        if (lastTouchCell) {
+                            drawCellsBetween(lastTouchCell.x, lastTouchCell.y, x, y, selectedColor);
+                        } else {
+                            // First cell
+                            grid[y][x] = selectedColor;
+                        }
                     }
                     lastTouchCell = {x, y};
                     drawGrid();
