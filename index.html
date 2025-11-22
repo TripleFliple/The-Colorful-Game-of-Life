@@ -797,6 +797,8 @@
         // Selection tool variables
         let selectToolActive = false;
         let pasteMode = false;
+        let pastePreviewPos = null; // Track mouse position for paste preview {x, y}
+        let pasteRotation = 0; // 0, 90, 180, 270 degrees
         let selectFirstCorner = null;
         let selectSecondCorner = null;
         let previewSelectEnd = null; // Preview position for selection rectangle
@@ -1051,6 +1053,69 @@
                 ctx.beginPath();
                 ctx.arc(centerScreenX, centerScreenY, radius, 0, 2 * Math.PI);
                 ctx.stroke();
+            }
+            
+            // Draw paste preview (faint outline of cells being pasted)
+            if (pasteMode && pastePreviewPos && copiedCells && copiedCells.cells) {
+                const targetX = pastePreviewPos.x;
+                const targetY = pastePreviewPos.y;
+                
+                // Calculate the center offset of the pattern
+                let minRelX = Infinity, maxRelX = -Infinity;
+                let minRelY = Infinity, maxRelY = -Infinity;
+                
+                for (let i = 0; i < copiedCells.cells.length; i++) {
+                    const cell = copiedCells.cells[i];
+                    minRelX = Math.min(minRelX, cell.x);
+                    maxRelX = Math.max(maxRelX, cell.x);
+                    minRelY = Math.min(minRelY, cell.y);
+                    maxRelY = Math.max(maxRelY, cell.y);
+                }
+                
+                const centerOffsetX = minRelX + Math.floor((maxRelX - minRelX) / 2);
+                const centerOffsetY = minRelY + Math.floor((maxRelY - minRelY) / 2);
+                
+                // Draw each cell in the pattern with rotation
+                ctx.globalAlpha = 0.4; // Faint preview
+                for (let i = 0; i < copiedCells.cells.length; i++) {
+                    const cell = copiedCells.cells[i];
+                    let relX = cell.x - centerOffsetX;
+                    let relY = cell.y - centerOffsetY;
+                    
+                    // Apply rotation
+                    if (pasteRotation === 90) {
+                        const temp = relX;
+                        relX = -relY;
+                        relY = temp;
+                    } else if (pasteRotation === 180) {
+                        relX = -relX;
+                        relY = -relY;
+                    } else if (pasteRotation === 270) {
+                        const temp = relX;
+                        relX = relY;
+                        relY = -temp;
+                    }
+                    
+                    const gridX = targetX + relX;
+                    const gridY = targetY + relY;
+                    
+                    // Only draw if within bounds and visible
+                    if (gridX >= 0 && gridX < GRID_WIDTH && gridY >= 0 && gridY < GRID_HEIGHT &&
+                        gridX >= viewOffsetX && gridX < viewOffsetX + cellsVisibleX &&
+                        gridY >= viewOffsetY && gridY < viewOffsetY + cellsVisibleY) {
+                        
+                        ctx.fillStyle = COLORS[cell.value];
+                        const screenX = (gridX - viewOffsetX) * effectiveCellSize;
+                        const screenY = (gridY - viewOffsetY) * effectiveCellSize;
+                        ctx.fillRect(screenX, screenY, effectiveCellSize, effectiveCellSize);
+                        
+                        // Draw outline for each cell
+                        ctx.strokeStyle = '#ffffff';
+                        ctx.lineWidth = 1;
+                        ctx.strokeRect(screenX, screenY, effectiveCellSize, effectiveCellSize);
+                    }
+                }
+                ctx.globalAlpha = 1.0; // Reset alpha
             }
             
             updateStats();
@@ -1973,26 +2038,37 @@
                     previewSelectEnd = {x, y};
                     drawGrid();
                 }
+            } else if (pasteMode) {
+                // Show paste preview when mouse moves
+                if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
+                    pastePreviewPos = {x: x, y: y}; // No offset needed - preview matches paste position
+                    drawGrid();
+                }
             }
         });
         
         // Clear eraser cursor when mouse leaves canvas
         canvas.addEventListener('mouseleave', () => {
             eraserCursorPos = null;
+            pastePreviewPos = null; // Clear paste preview
             canvas.classList.remove('eraser-cursor');
             mouseDown = false;
             lastCell = null;
             if (eraserActive) {
                 eraserActive = false;
             }
-            if (eraserMode) {
-                drawGrid(); // Redraw to remove cursor
-            }
+            drawGrid(); // Always redraw to remove any preview elements
         });
         
         // Prevent context menu on right click
         canvas.addEventListener('contextmenu', (e) => {
             e.preventDefault();
+            
+            // If in paste mode, rotate the pattern 90 degrees clockwise
+            if (pasteMode && copiedCells && copiedCells.cells) {
+                pasteRotation = (pasteRotation + 90) % 360;
+                drawGrid(); // Redraw to show rotated preview
+            }
         });
         
         // Touch events for mobile support
@@ -2676,11 +2752,28 @@
             const centerOffsetX = minRelX + Math.floor((maxRelX - minRelX) / 2);
             const centerOffsetY = minRelY + Math.floor((maxRelY - minRelY) / 2);
             
-            // Paste centered on the target position
+            // Paste centered on the target position with rotation
             for (let i = 0; i < copiedCells.cells.length; i++) {
                 const cell = copiedCells.cells[i];
-                const gridX = targetX + cell.x - centerOffsetX;
-                const gridY = targetY + cell.y - centerOffsetY;
+                let relX = cell.x - centerOffsetX;
+                let relY = cell.y - centerOffsetY;
+                
+                // Apply rotation
+                if (pasteRotation === 90) {
+                    const temp = relX;
+                    relX = -relY;
+                    relY = temp;
+                } else if (pasteRotation === 180) {
+                    relX = -relX;
+                    relY = -relY;
+                } else if (pasteRotation === 270) {
+                    const temp = relX;
+                    relX = relY;
+                    relY = -temp;
+                }
+                
+                const gridX = targetX + relX;
+                const gridY = targetY + relY;
                 if (gridX >= 0 && gridX < GRID_WIDTH && gridY >= 0 && gridY < GRID_HEIGHT) {
                     grid[gridY][gridX] = cell.value;
                 }
@@ -2758,6 +2851,8 @@
         function deactivatePasteMode() {
             if (pasteMode) {
                 pasteMode = false;
+                pastePreviewPos = null; // Clear paste preview
+                pasteRotation = 0; // Reset rotation
                 previewSelectEnd = null; // Clear selection preview
                 const pasteButton = document.getElementById('pasteButton');
                 pasteButton.classList.remove('active');
@@ -3105,7 +3200,7 @@
                         item.appendChild(deleteBtn);
                         
                         item.onclick = () => {
-                            selectPatternForPaste(pattern);
+                            selectPatternForPaste(pattern, ruleSet.rules);
                             modal.style.display = 'none';
                         };
                         
@@ -3173,13 +3268,18 @@
             saveAllRuleSets(ruleSets);
         }
         
-        function selectPatternForPaste(pattern) {
+        function selectPatternForPaste(pattern, rules) {
             // Convert pattern to copiedCells format
             copiedCells = {
                 minX: 0,
                 minY: 0,
                 cells: pattern.cells
             };
+            
+            // Apply the rule set if provided
+            if (rules) {
+                applyRuleSet(rules);
+            }
             
             // Activate paste mode
             pasteMode = true;
@@ -3188,6 +3288,60 @@
             
             // Deactivate select tool
             deactivateSelectTool();
+        }
+        
+        // Apply a rule set's configuration
+        function applyRuleSet(rules) {
+            // Apply birth rules
+            BIRTH_MIN_NEIGHBORS = rules.birthMin;
+            BIRTH_MAX_NEIGHBORS = rules.birthMax;
+            document.getElementById('birthMin').value = rules.birthMin;
+            document.getElementById('birthMax').value = rules.birthMax;
+            document.getElementById('birthMinValue').textContent = rules.birthMin;
+            document.getElementById('birthMaxValue').textContent = rules.birthMax;
+            
+            // Apply survival rules
+            SURVIVAL_MIN_NEIGHBORS = rules.survivalMin;
+            SURVIVAL_MAX_NEIGHBORS = rules.survivalMax;
+            document.getElementById('survivalMin').value = rules.survivalMin;
+            document.getElementById('survivalMax').value = rules.survivalMax;
+            document.getElementById('survivalMinValue').textContent = rules.survivalMin;
+            document.getElementById('survivalMaxValue').textContent = rules.survivalMax;
+            
+            // Apply evolution rules
+            EVOLUTION_MIN_NEIGHBORS = rules.evolutionMin;
+            EVOLUTION_MAX_NEIGHBORS = rules.evolutionMax;
+            document.getElementById('evolutionMin').value = rules.evolutionMin;
+            document.getElementById('evolutionMax').value = rules.evolutionMax;
+            document.getElementById('evolutionMinValue').textContent = rules.evolutionMin;
+            document.getElementById('evolutionMaxValue').textContent = rules.evolutionMax;
+            
+            // Apply death rule
+            DEATH_MIN_NEIGHBORS = rules.deathMin;
+            document.getElementById('deathMin').value = rules.deathMin;
+            document.getElementById('deathMinValue').textContent = rules.deathMin;
+            
+            // Apply color expansion rate
+            COLOR_EXPANSION_RATE = rules.colorExpansion;
+            document.getElementById('colorExpansionRate').value = rules.colorExpansion;
+            document.getElementById('colorExpansionValue').textContent = rules.colorExpansion;
+            
+            // Apply neighbors fight toggle
+            neighborsFightEnabled = rules.neighborsFight;
+            const neighborsFightBtn = document.getElementById('toggleNeighborsFight');
+            neighborsFightBtn.textContent = neighborsFightEnabled ? 'Neighbors Fight: ON' : 'Neighbors Fight: OFF';
+            neighborsFightBtn.classList.toggle('active', neighborsFightEnabled);
+            
+            // Apply moving cells toggle
+            movingCellsEnabled = rules.movingCells;
+            const movingCellsBtn = document.getElementById('toggleMovingCells');
+            movingCellsBtn.textContent = movingCellsEnabled ? 'Moving Cells: ON' : 'Moving Cells: OFF';
+            movingCellsBtn.classList.toggle('active', movingCellsEnabled);
+            
+            // Clear moving cells if disabled
+            if (!movingCellsEnabled) {
+                movingCells = [];
+            }
         }
         
         function exportAllRuleSets() {
