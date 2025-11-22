@@ -555,11 +555,12 @@
             <span id="speedValue">20</span>
         </div>
         <button id="toggleNeighborsFight" class="active">Neighbors Fight: ON</button>
-        <button id="toggleMovingCells" class="active">Moving Cells: ON</button>
+        <button id="toggleMovingCells">Moving Cells: OFF</button>
     </div>
     
-    <!-- Row 3: Color Expansion Slider -->
+    <!-- Row 3: Color Evolution Toggle and Expansion Slider -->
     <div class="controls">
+        <button id="toggleColorEvolution" class="active">Color Evolution: ON</button>
         <div class="slider-container">
             <label>Color Expansion (every 1-300 steps):</label>
             <input type="range" id="colorExpansionRate" min="1" max="300" value="100">
@@ -778,8 +779,9 @@
         let zoomLevel = 1; // Zoom level (1 = normal, 2 = 2x zoom, etc)
         let viewOffsetX = 0; // Viewport offset for panning when zoomed
         let viewOffsetY = 0;
-        let movingCellsEnabled = true; // Toggle for moving cells feature
+        let movingCellsEnabled = false; // Toggle for moving cells feature (default: off)
         let neighborsFightEnabled = true; // Toggle for neighbors fight feature (ON by default)
+        let colorEvolutionEnabled = true; // Toggle for color evolution feature (ON by default)
         let zoomMode = 0; // 0 = normal, 1 = zoom in mode, 2 = zoom out mode
         let lineToolActive = false; // Toggle for line drawing tool
         let lineStartPoint = null; // First point of line
@@ -820,7 +822,8 @@
         function getCurrentRuleSignature() {
             const nf = neighborsFightEnabled ? 'NF' : 'nf';
             const mc = movingCellsEnabled ? 'MC' : 'mc';
-            return `B${BIRTH_MIN_NEIGHBORS}-${BIRTH_MAX_NEIGHBORS}_S${SURVIVAL_MIN_NEIGHBORS}-${SURVIVAL_MAX_NEIGHBORS}_E${EVOLUTION_MIN_NEIGHBORS}-${EVOLUTION_MAX_NEIGHBORS}_D${DEATH_MIN_NEIGHBORS}_C${COLOR_EXPANSION_RATE}_${nf}_${mc}`;
+            const ce = colorEvolutionEnabled ? 'CE' : 'ce';
+            return `B${BIRTH_MIN_NEIGHBORS}-${BIRTH_MAX_NEIGHBORS}_S${SURVIVAL_MIN_NEIGHBORS}-${SURVIVAL_MAX_NEIGHBORS}_E${EVOLUTION_MIN_NEIGHBORS}-${EVOLUTION_MAX_NEIGHBORS}_D${DEATH_MIN_NEIGHBORS}_C${COLOR_EXPANSION_RATE}_${nf}_${mc}_${ce}`;
         }
         
         // Get all rule sets from storage
@@ -858,7 +861,8 @@
         function getRuleDescription(rules) {
             const nf = rules.neighborsFight ? 'ON' : 'OFF';
             const mc = rules.movingCells ? 'ON' : 'OFF';
-            return `Birth: ${rules.birthMin}-${rules.birthMax}, Survival: ${rules.survivalMin}-${rules.survivalMax}, Evolution: ${rules.evolutionMin}-${rules.evolutionMax}, Death: ${rules.deathMin}+, Color Exp: ${rules.colorExpansion}, Neighbors Fight: ${nf}, Moving Cells: ${mc}`;
+            const ce = rules.colorEvolution !== undefined ? (rules.colorEvolution ? 'ON' : 'OFF') : 'ON';
+            return `Birth: ${rules.birthMin}-${rules.birthMax}, Survival: ${rules.survivalMin}-${rules.survivalMax}, Evolution: ${rules.evolutionMin}-${rules.evolutionMax}, Death: ${rules.deathMin}+, Color Exp: ${rules.colorExpansion}, Neighbors Fight: ${nf}, Moving Cells: ${mc}, Color Evolution: ${ce}`;
         }
         
         // Erase cells in a circular area based on eraser size
@@ -1365,18 +1369,6 @@
             return group;
         }
         
-        // Check if there are any moving white cells in neighboring positions
-        function hasMovingWhiteNeighbor(x, y) {
-            for (let movingCell of movingCells) {
-                const dx = Math.abs(movingCell.x - x);
-                const dy = Math.abs(movingCell.y - y);
-                if (dx <= 1 && dy <= 1 && !(dx === 0 && dy === 0)) {
-                    return true;
-                }
-            }
-            return false;
-        }
-        
         // Update grid for next generation
         function updateGrid() {
             const newGrid = Array(GRID_HEIGHT).fill(null).map(() => Array(GRID_WIDTH).fill(0));
@@ -1608,8 +1600,8 @@
                     } else if (cell >= 1 && cell <= 9) {
                         const neighbors = countNeighbors(x, y, cell);
                         
-                        // Magenta special case: evolution range neighbors
-                        if (cell === 9 && neighbors >= EVOLUTION_MIN_NEIGHBORS && neighbors <= EVOLUTION_MAX_NEIGHBORS) {
+                        // Magenta special case: evolution range neighbors (only if color evolution is enabled)
+                        if (colorEvolutionEnabled && cell === 9 && neighbors >= EVOLUTION_MIN_NEIGHBORS && neighbors <= EVOLUTION_MAX_NEIGHBORS) {
                             if (movingCellsEnabled) {
                                 // Moving cells enabled: spawn moving white and die
                                 newGrid[y][x] = CELL_EMPTY;
@@ -1640,8 +1632,8 @@
                                 newStagnationTimers[y][x] = 0;
                             }
                         }
-                        // Evolution: evolve to next color based on adjustable neighbor range (CHECK FIRST for priority)
-                        else if (neighbors >= EVOLUTION_MIN_NEIGHBORS && neighbors <= EVOLUTION_MAX_NEIGHBORS && cell < 9) {
+                        // Evolution: evolve to next color based on adjustable neighbor range (only if color evolution is enabled)
+                        else if (colorEvolutionEnabled && neighbors >= EVOLUTION_MIN_NEIGHBORS && neighbors <= EVOLUTION_MAX_NEIGHBORS && cell < 9) {
                             newGrid[y][x] = cell + 1;
                             newStagnationTimers[y][x] = 0;
                         }
@@ -2508,6 +2500,13 @@
             }
         });
         
+        document.getElementById('toggleColorEvolution').addEventListener('click', function() {
+            deactivateZoom();
+            colorEvolutionEnabled = !colorEvolutionEnabled;
+            this.textContent = colorEvolutionEnabled ? 'Color Evolution: ON' : 'Color Evolution: OFF';
+            this.classList.toggle('active');
+        });
+        
         document.getElementById('colorExpansionRate').addEventListener('input', (e) => {
             deactivateZoom();
             COLOR_EXPANSION_RATE = parseInt(e.target.value);
@@ -2928,7 +2927,8 @@
                     deathMin: DEATH_MIN_NEIGHBORS,
                     colorExpansion: COLOR_EXPANSION_RATE,
                     neighborsFight: neighborsFightEnabled,
-                    movingCells: movingCellsEnabled
+                    movingCells: movingCellsEnabled,
+                    colorEvolution: colorEvolutionEnabled
                 };
                 
                 showCustomPrompt('New Rule Set Detected', 'Name this rule set:\n' + getRuleDescription(currentRules), 'Custom Rules ' + Object.keys(ruleSets).length, (newRuleSetName) => {
@@ -3338,6 +3338,12 @@
             movingCellsBtn.textContent = movingCellsEnabled ? 'Moving Cells: ON' : 'Moving Cells: OFF';
             movingCellsBtn.classList.toggle('active', movingCellsEnabled);
             
+            // Apply color evolution toggle (default to true if not specified for backward compatibility)
+            colorEvolutionEnabled = rules.colorEvolution !== undefined ? rules.colorEvolution : true;
+            const colorEvolutionBtn = document.getElementById('toggleColorEvolution');
+            colorEvolutionBtn.textContent = colorEvolutionEnabled ? 'Color Evolution: ON' : 'Color Evolution: OFF';
+            colorEvolutionBtn.classList.toggle('active', colorEvolutionEnabled);
+            
             // Clear moving cells if disabled
             if (!movingCellsEnabled) {
                 movingCells = [];
@@ -3468,7 +3474,8 @@
                     viewOffsetX: viewOffsetX,
                     viewOffsetY: viewOffsetY,
                     movingCellsEnabled: movingCellsEnabled,
-                    neighborsFightEnabled: neighborsFightEnabled
+                    neighborsFightEnabled: neighborsFightEnabled,
+                    colorEvolutionEnabled: colorEvolutionEnabled
                 }
             };
             
@@ -3548,6 +3555,8 @@
                             viewOffsetY = gameState.settings.viewOffsetY;
                             movingCellsEnabled = gameState.settings.movingCellsEnabled;
                             neighborsFightEnabled = gameState.settings.neighborsFightEnabled;
+                            colorEvolutionEnabled = gameState.settings.colorEvolutionEnabled !== undefined ? 
+                                gameState.settings.colorEvolutionEnabled : true; // Default to true for backward compatibility
                             
                             // Update UI
                             document.querySelectorAll('.color-swatch').forEach((swatch) => {
@@ -3561,6 +3570,10 @@
                             document.getElementById('toggleNeighborsFight').textContent = 
                                 neighborsFightEnabled ? 'Neighbors Fight: ON' : 'Neighbors Fight: OFF';
                             document.getElementById('toggleNeighborsFight').classList.toggle('active', neighborsFightEnabled);
+                            
+                            document.getElementById('toggleColorEvolution').textContent = 
+                                colorEvolutionEnabled ? 'Color Evolution: ON' : 'Color Evolution: OFF';
+                            document.getElementById('toggleColorEvolution').classList.toggle('active', colorEvolutionEnabled);
                         }
                         
                         // Update canvas size selectors
