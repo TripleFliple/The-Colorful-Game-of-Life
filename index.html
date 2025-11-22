@@ -2257,7 +2257,7 @@
                 return;
             }
             
-            if (zoomMode !== 0 || lineToolActive || rectangleToolActive || ovalToolActive || selectToolActive) return;
+            if (zoomMode !== 0 || lineToolActive || rectangleToolActive || ovalToolActive || selectToolActive || pasteMode) return;
             
             if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
                 // Adjust coordinates for direct drawing
