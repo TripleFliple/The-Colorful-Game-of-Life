@@ -43,6 +43,222 @@
             cursor: none; /* Hide default cursor when using eraser */
         }
         
+        /* Selection box styles */
+        .selection-box {
+            position: absolute;
+            border: 2px dashed #fff;
+            pointer-events: none;
+            z-index: 1000;
+            box-shadow: 0 0 10px rgba(255,255,255,0.5);
+        }
+        
+        .save-button {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: #2a6a2a;
+            border: 2px solid #fff;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 9px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1001;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            font-weight: bold;
+            pointer-events: auto;
+        }
+        
+        .save-button:hover {
+            background: #3a8a3a;
+            transform: scale(1.1);
+        }
+        
+        /* Load modal styles */
+        .load-modal {
+            display: none;
+            position: fixed;
+            z-index: 2000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.8);
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .load-modal-content {
+            background-color: #1a1a1a;
+            padding: 20px;
+            border: 2px solid #444;
+            border-radius: 10px;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+        }
+        
+        .load-modal-title {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 15px;
+            color: #fff;
+        }
+        
+        .saved-pattern-item {
+            background: #2a2a2a;
+            border: 2px solid #444;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .saved-pattern-item:hover {
+            background: #3a3a3a;
+            border-color: #666;
+            transform: scale(1.02);
+        }
+        
+        .pattern-info {
+            flex: 1;
+        }
+        
+        .pattern-name {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .pattern-size {
+            font-size: 11px;
+            color: #aaa;
+        }
+        
+        .pattern-delete {
+            background: #6a2a2a;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+        
+        .pattern-delete:hover {
+            background: #8a3a3a;
+        }
+        
+        .close-modal {
+            background: #4a4a4a;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            padding: 10px 20px;
+            cursor: pointer;
+            margin-top: 15px;
+            width: 100%;
+        }
+        
+        .close-modal:hover {
+            background: #5a5a5a;
+        }
+        
+        .no-patterns-message {
+            text-align: center;
+            color: #888;
+            padding: 20px;
+            font-style: italic;
+        }
+        
+        .rule-set-section {
+            margin-bottom: 15px;
+            border: 1px solid #444;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        
+        .rule-set-header {
+            background: #2a2a2a;
+            padding: 12px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #444;
+            transition: background 0.2s;
+        }
+        
+        .rule-set-header:hover {
+            background: #3a3a3a;
+        }
+        
+        .rule-set-title {
+            font-weight: bold;
+            font-size: 14px;
+            flex: 1;
+        }
+        
+        .rule-set-info {
+            font-size: 11px;
+            color: #888;
+            margin-top: 3px;
+        }
+        
+        .rule-set-count {
+            background: #4a4a4a;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            margin-left: 10px;
+        }
+        
+        .rule-set-actions {
+            display: flex;
+            gap: 5px;
+            margin-left: 10px;
+        }
+        
+        .rule-set-action-btn {
+            background: #4a4a4a;
+            color: #fff;
+            border: none;
+            border-radius: 3px;
+            padding: 4px 8px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+        
+        .rule-set-action-btn:hover {
+            background: #5a5a5a;
+        }
+        
+        .rule-set-patterns {
+            display: none;
+            background: #1a1a1a;
+        }
+        
+        .rule-set-patterns.expanded {
+            display: block;
+        }
+        
+        .expand-icon {
+            font-size: 12px;
+            margin-right: 8px;
+            transition: transform 0.2s;
+        }
+        
+        .expand-icon.expanded {
+            transform: rotate(90deg);
+        }
+        
         .controls {
             margin: 20px 0;
             display: flex;
@@ -303,16 +519,31 @@
         <button class="tool-button" id="rectangleToolButton" title="Rectangle Tool">▢</button>
         <button class="tool-button" id="ovalToolButton" title="Oval Tool">⬭</button>
         <button class="tool-button" id="randomButton" title="Random">🎲</button>
+        <button class="tool-button" id="eraserButton" title="Eraser">🗑</button>
+        <button class="tool-button" id="selectButton" title="Select">⬚</button>
+        <button class="tool-button" id="pasteButton" title="Paste">📋</button>
+        <button class="tool-button" id="loadPatternButton" title="Load Pattern">📂</button>
     </div>
     
-    <!-- Row 1: Play/Pause, Step, Clear, Eraser, Zoom -->
+    <!-- Load Modal -->
+    <div id="loadModal" class="load-modal">
+        <div class="load-modal-content">
+            <div class="load-modal-title">Saved Patterns</div>
+            <div id="savedPatternsList"></div>
+            <div style="display: flex; gap: 10px; margin-top: 15px;">
+                <button class="close-modal" style="flex: 1;" id="exportAllButton">Export All</button>
+                <button class="close-modal" style="flex: 1;" id="importButton">Import</button>
+                <button class="close-modal" style="flex: 1;" id="closeModal">Close</button>
+            </div>
+        </div>
+    </div>
+    <input type="file" id="importFileInput" accept=".json" style="display: none;">
+    
+    <!-- Row 1: Play/Pause, Step, Clear, Zoom -->
     <div class="controls">
         <button id="playPause">▶ Play</button>
         <button id="step">Step</button>
         <button id="clear">Clear</button>
-        <button class="color-button" id="eraserButton">
-            <span style="font-size: 16px;">🗑️</span> Eraser
-        </button>
         <button id="zoomButton">Zoom: OFF</button>
     </div>
     
@@ -374,12 +605,14 @@
     <!-- Cellular Automaton Rules Section -->
     <div class="controls">
         <label>Cellular Automaton Rules:</label>
+        <button class="tool-button" id="saveButton" title="Save Game">💾</button>
+        <button class="tool-button" id="loadButton" title="Load Game">📂</button>
     </div>
     
     <div class="rules-section">
         <!-- Birth Rule -->
         <div class="rule-group">
-            <div class="rule-title">Birth (Neighbors):</div>
+            <div class="rule-title">Birth (neighbor count):</div>
             <div class="rule-sliders">
                 <div class="slider-container">
                     <label>Min:</label>
@@ -396,7 +629,7 @@
         
         <!-- Survival Rule -->
         <div class="rule-group">
-            <div class="rule-title">Survival (Neighbors):</div>
+            <div class="rule-title">Survival (neighbor count):</div>
             <div class="rule-sliders">
                 <div class="slider-container">
                     <label>Min:</label>
@@ -413,7 +646,7 @@
         
         <!-- Evolution Rule -->
         <div class="rule-group">
-            <div class="rule-title">Evolution (Neighbors):</div>
+            <div class="rule-title">Color Evolution (neighbor count):</div>
             <div class="rule-sliders">
                 <div class="slider-container">
                     <label>Min:</label>
@@ -430,7 +663,7 @@
         
         <!-- Death Rule -->
         <div class="rule-group">
-            <div class="rule-title">Death (Overpopulation):</div>
+            <div class="rule-title">Overpopulation Death (neighbor limit):</div>
             <div class="rule-sliders">
                 <div class="slider-container">
                     <label>At:</label>
@@ -450,26 +683,45 @@
         <h3>Game Rules:</h3>
         <ul>
             <li><strong>Birth:</strong> Empty cells with 3 neighbors of a color are born as that color (default: 3-3, adjustable)</li>
-            <li><strong>Survival:</strong> Cells with 2-3 neighbors survive (default: 2-3, adjustable)</li>
+            <li><strong>Evolution:</strong> Cells with 4 neighbors evolve to next color (default: 4-4, adjustable). <em>Evolution is checked FIRST, allowing overlap with survival range for dynamic color changes</em></li>
+            <li><strong>Survival:</strong> Cells with 2-3 neighbors survive (default: 2-3, adjustable). Only applies if evolution doesn't trigger</li>
             <li><strong>Death:</strong> Cells die with &lt;2 neighbors (isolation) or 5+ neighbors (overpopulation, default: 5+, adjustable)</li>
-            <li><strong>Evolution:</strong> Cells with 4 neighbors evolve to next color (default: 4-4, adjustable)</li>
             <li><strong>Magenta Special:</strong> Magenta cells in evolution range spawn moving white spore then die (with Moving Cells ON) or evolve to white (OFF)</li>
-            <li><strong>Color Expansion Rate:</strong> Controls stagnation threshold (1-300 generations, default: 100). Affects both Moving Cells spawning and Neighbors Fight conversion speed. Lower = faster action, higher = more stability.</li>
-            <li><strong>Moving Cells (Toggleable):</strong> When ON, stagnant cells (3+ same-color neighbors unchanged for Color Expansion Rate) spawn moving cells. Moving cells travel outward (70% straight/30% turn), pass through other movers, and after 4+ frames: stop on same color or convert entire groups of different colors.</li>
-            <li><strong>Neighbors Fight (Toggleable):</strong> When ON, stagnant cells of a higher-color will convert adjacent lower-colored neighbors. This occurs based on the Color Expansion Rate (1-300 steps). This can break stagnation and create color battles or territory expansion.</li>
+            <li><strong>Color Expansion Rate:</strong> Controls stagnation threshold (1-300 generations, default: 100). Affects both Moving Cells spawning and Neighbors Fight conversion speed. Lower = faster action, higher = more stability</li>
+            <li><strong>Moving Cells (Toggleable):</strong> When ON, stagnant cells (3+ same-color neighbors unchanged for Color Expansion Rate) spawn moving cells. Moving cells travel outward (70% straight/30% turn), pass through other movers, and after 4+ frames: stop on same color or convert entire groups of different colors</li>
+            <li><strong>Neighbors Fight (Toggleable):</strong> When ON, stagnant cells of a higher-color will convert adjacent lower-colored neighbors. This occurs based on the Color Expansion Rate (1-300 steps). This can break stagnation and create color battles or territory expansion</li>
             <li><strong>Color Hierarchy:</strong> White → Red → Orange → Yellow → Green → Cyan → Blue → Purple → Magenta → (spawns White spore)</li>
         </ul>
         <h3>Drawing Tools:</h3>
         <ul>
-            <li><strong>Color Selection:</strong> Click any color swatch above the controls to select a drawing color, then click/drag on canvas to draw cells</li>
-            <li><strong>Eraser:</strong> Cycles through 5x5 → 25x25 → 51x51 → OFF. Red circle shows eraser size, fills when actively erasing</li>
-            <li><strong>Line Tool:</strong> Click start point, move mouse (red preview line), click end point to draw straight line</li>
-            <li><strong>Rectangle Tool:</strong> Click corner, move mouse (red preview box), click opposite corner to draw rectangle outline</li>
-            <li><strong>Oval Tool:</strong> Click corner, move mouse (red preview ellipse), click opposite corner to draw oval outline</li>
-            <li><strong>Zoom:</strong> Cycles through OFF → IN (click to zoom in) → OUT (click to zoom out) → OFF. Auto-limited to prevent black space based on canvas size.</li>
-            <li><strong>Canvas Size:</strong> Custom width/height with dropdowns (50-500 cells). Click "Apply Size" to rebuild grid. Mobile devices auto-detect and use 100x150.</li>
+            <li><strong>Color Selection:</strong> Click any color swatch to select a drawing color, then click/drag on canvas to draw cells</li>
+            <li><strong>Eraser (🗑):</strong> Click to activate/deactivate: 25×25 → OFF. Red circle shows eraser size and fills when actively erasing</li>
+            <li><strong>Line Tool (╱):</strong> Click start point, move mouse (red preview line), click end point to draw straight line</li>
+            <li><strong>Rectangle Tool (▢):</strong> Click corner, move mouse (red preview box), click opposite corner to draw rectangle outline</li>
+            <li><strong>Oval Tool (⬭):</strong> Click corner, move mouse (red preview ellipse), click opposite corner to draw oval outline</li>
+            <li><strong>Select Tool (⬚):</strong> Click two points on canvas to select a rectangular area. Selection is automatically copied. Click and drag anywhere within the selection box to move the cells to a new position. Save button (💾) appears in bottom-right of selection box (desktop only)</li>
+            <li><strong>Paste Tool (📋):</strong> After selecting/copying or loading a saved pattern, click Paste then click anywhere on canvas to place the pattern</li>
+            <li><strong>Load Pattern (📂, desktop only):</strong> Opens saved patterns library organized by rule sets. Click any pattern to load it for pasting</li>
+            <li><strong>Random (🎲):</strong> Click to fill canvas with random cells in the currently selected color</li>
+            <li><strong>Zoom:</strong> Cycles through OFF → IN (click to zoom in) → OUT (click to zoom out) → OFF. Auto-limited to prevent black space based on canvas size</li>
         </ul>
-        <p><strong>Tips:</strong> Avoid a birth minimum of 0 because it causes very unpleasant blinking. Open the birth range to create mind-blowing reactions. Open the evolution range to create endless colorful visuals. Bring the survival minimum down to 0 and watch crystal looking growths form. </p>
+        <h3>Pattern Management (Desktop Only):</h3>
+        <ul>
+            <li><strong>Rule Set Organization:</strong> Patterns are automatically organized into rule sets based on your current game rules (Birth, Survival, Evolution, Death, Color Expansion, Neighbors Fight, Moving Cells). When you save a pattern with new rules, you'll be prompted to name a new rule set</li>
+            <li><strong>Save Pattern:</strong> Use Select Tool to select an area, then click the green 💾 button in bottom-right of selection box. If your current rules match an existing rule set, the pattern is saved there automatically. If rules are different, you'll name a new rule set first, then name the pattern</li>
+            <li><strong>Load Pattern:</strong> Click the 📂 Load Pattern button to view all rule sets and their patterns. Rule sets appear as collapsible sections showing rule details and pattern count. Click any pattern to load it into paste mode</li>
+            <li><strong>Export/Import:</strong> Export individual rule sets or all rule sets as JSON files. Import previously exported files to restore or share your pattern libraries. Handles name collisions automatically</li>
+            <li><strong>Delete:</strong> Delete individual patterns or entire rule sets with all their patterns from the Load Pattern dialog</li>
+        </ul>
+        <h3>Game Controls:</h3>
+        <ul>
+            <li><strong>Play/Pause (▶):</strong> Start or pause the simulation</li>
+            <li><strong>Step:</strong> Advance exactly one generation (useful for examining patterns closely)</li>
+            <li><strong>Clear:</strong> Erase all cells from the canvas</li>
+            <li><strong>Speed Slider:</strong> Adjust simulation speed from 1 (slowest) to 30 (fastest) generations per second</li>
+            <li><strong>Canvas Size:</strong> Custom width/height with dropdowns (50-500 cells). Click "Apply Size" to rebuild grid. Mobile devices auto-detect and use 100×150</li>
+        </ul>
+        <p><strong>Tips:</strong> Avoid a birth minimum of 0 because it causes very unpleasant blinking. Open the birth range to create mind-blowing reactions. <strong>Try wide survival ranges (like 2-6) with narrower evolution ranges (like 4-5) for dynamic color shifting!</strong> Bring the survival minimum down to 0 and watch crystal-like growths form. Use rule sets to organize your discoveries - experiment with different combinations of rules and toggles, then save patterns for each configuration!</p>
     </div>
 
     <script>
@@ -541,6 +793,71 @@
         let eraserCursorPos = null; // Track mouse position for eraser cursor {x, y} in grid coords
         let eraserSize = 0; // 0 = off, 1 = 5x5 (radius 2.5), 2 = 25x25 (radius 12.5), 3 = 51x51 (radius 25.5)
         let eraserActive = false; // Track if eraser is currently being used (mouse/touch down)
+        
+        // Selection tool variables
+        let selectToolActive = false;
+        let pasteMode = false;
+        let selectFirstCorner = null;
+        let selectSecondCorner = null;
+        let previewSelectEnd = null; // Preview position for selection rectangle
+        let selectionBox = null;
+        let saveButton = null;
+        let copiedCells = null;
+        let isDraggingSelection = false;
+        let dragStartX = 0;
+        let dragStartY = 0;
+        let selectionOffsetX = 0;
+        let selectionOffsetY = 0;
+        let originalCellsCleared = false; // Track if original cells have been cleared when dragging
+        
+        // Pattern save/load storage - now organized by rule sets
+        const RULESETS_STORAGE_KEY = 'gameOfLifeRuleSets';
+        let isMobile = false;
+        
+        // Get current rule set signature (used to identify if rules have changed)
+        function getCurrentRuleSignature() {
+            const nf = neighborsFightEnabled ? 'NF' : 'nf';
+            const mc = movingCellsEnabled ? 'MC' : 'mc';
+            return `B${BIRTH_MIN_NEIGHBORS}-${BIRTH_MAX_NEIGHBORS}_S${SURVIVAL_MIN_NEIGHBORS}-${SURVIVAL_MAX_NEIGHBORS}_E${EVOLUTION_MIN_NEIGHBORS}-${EVOLUTION_MAX_NEIGHBORS}_D${DEATH_MIN_NEIGHBORS}_C${COLOR_EXPANSION_RATE}_${nf}_${mc}`;
+        }
+        
+        // Get all rule sets from storage
+        function getAllRuleSets() {
+            try {
+                const stored = localStorage.getItem(RULESETS_STORAGE_KEY);
+                return stored ? JSON.parse(stored) : {};
+            } catch (e) {
+                return {};
+            }
+        }
+        
+        // Save all rule sets to storage
+        function saveAllRuleSets(ruleSets) {
+            try {
+                localStorage.setItem(RULESETS_STORAGE_KEY, JSON.stringify(ruleSets));
+                return true;
+            } catch (e) {
+                return false;
+            }
+        }
+        
+        // Find rule set by signature
+        function findRuleSetBySignature(signature) {
+            const ruleSets = getAllRuleSets();
+            for (let ruleSetName in ruleSets) {
+                if (ruleSets[ruleSetName].signature === signature) {
+                    return ruleSetName;
+                }
+            }
+            return null;
+        }
+        
+        // Get readable rule set description
+        function getRuleDescription(rules) {
+            const nf = rules.neighborsFight ? 'ON' : 'OFF';
+            const mc = rules.movingCells ? 'ON' : 'OFF';
+            return `Birth: ${rules.birthMin}-${rules.birthMax}, Survival: ${rules.survivalMin}-${rules.survivalMax}, Evolution: ${rules.evolutionMin}-${rules.evolutionMax}, Death: ${rules.deathMin}+, Color Exp: ${rules.colorExpansion}, Neighbors Fight: ${nf}, Moving Cells: ${mc}`;
+        }
         
         // Erase cells in a circular area based on eraser size
         function eraseCircularArea(x, y) {
@@ -683,6 +1000,25 @@
                 ctx.beginPath();
                 ctx.ellipse(centerScreenX, centerScreenY, radiusX, radiusY, 0, 0, 2 * Math.PI);
                 ctx.stroke();
+            }
+            
+            // Draw selection tool preview (red rectangle outline)
+            if (selectToolActive && selectFirstCorner && previewSelectEnd && !selectSecondCorner) {
+                ctx.strokeStyle = '#ff0000'; // Red outline
+                ctx.lineWidth = 1;
+                
+                // Use same min/max logic as createSelectionBox
+                const minX = Math.min(selectFirstCorner.x, previewSelectEnd.x);
+                const minY = Math.min(selectFirstCorner.y, previewSelectEnd.y);
+                const maxX = Math.max(selectFirstCorner.x, previewSelectEnd.x);
+                const maxY = Math.max(selectFirstCorner.y, previewSelectEnd.y);
+                
+                const startScreenX = (minX - viewOffsetX) * effectiveCellSize;
+                const startScreenY = (minY - viewOffsetY) * effectiveCellSize;
+                const endScreenX = (maxX + 1 - viewOffsetX) * effectiveCellSize;
+                const endScreenY = (maxY + 1 - viewOffsetY) * effectiveCellSize;
+                
+                ctx.strokeRect(startScreenX, startScreenY, endScreenX - startScreenX, endScreenY - startScreenY);
             }
             
             // Draw eraser cursor - circle with red outline matching current eraser size
@@ -1239,20 +1575,15 @@
                                 newStagnationTimers[y][x] = 0;
                             }
                         }
-                        // Survival: adjustable neighbor range
-                        else if (neighbors >= SURVIVAL_MIN_NEIGHBORS && neighbors <= SURVIVAL_MAX_NEIGHBORS) {
-                            newGrid[y][x] = cell;
-                            newStagnationTimers[y][x] = stagnationTimers[y][x] + 1;
-                        }
-                        // Evolution: evolve to next color based on adjustable neighbor range
+                        // Evolution: evolve to next color based on adjustable neighbor range (CHECK FIRST for priority)
                         else if (neighbors >= EVOLUTION_MIN_NEIGHBORS && neighbors <= EVOLUTION_MAX_NEIGHBORS && cell < 9) {
                             newGrid[y][x] = cell + 1;
                             newStagnationTimers[y][x] = 0;
                         }
-                        else if (neighbors >= EVOLUTION_MIN_NEIGHBORS && neighbors <= EVOLUTION_MAX_NEIGHBORS && cell === 9 && !movingCellsEnabled) {
-                            // Magenta evolves to white when moving cells disabled
-                            newGrid[y][x] = 1; // White
-                            newStagnationTimers[y][x] = 0;
+                        // Survival: adjustable neighbor range (checked after evolution)
+                        else if (neighbors >= SURVIVAL_MIN_NEIGHBORS && neighbors <= SURVIVAL_MAX_NEIGHBORS) {
+                            newGrid[y][x] = cell;
+                            newStagnationTimers[y][x] = stagnationTimers[y][x] + 1;
                         }
                         // Otherwise: die
                         else {
@@ -1336,6 +1667,13 @@
         
         // Game loop
         function gameLoop(timestamp) {
+            // Pause game if select tool becomes active
+            if (selectToolActive && isPlaying) {
+                isPlaying = false;
+                document.getElementById('playPause').textContent = '▶ Play';
+                return;
+            }
+            
             if (isPlaying) {
                 if (timestamp - lastUpdate > 1000 / SPEED) {
                     updateGrid();
@@ -1357,7 +1695,7 @@
         function randomGrid() {
             for (let y = 0; y < GRID_HEIGHT; y++) {
                 for (let x = 0; x < GRID_WIDTH; x++) {
-                    grid[y][x] = Math.random() > 0.85 ? 1 : 0;
+                    grid[y][x] = Math.random() > 0.85 ? selectedColor : 0;
                 }
             }
             generation = 0;
@@ -1377,10 +1715,63 @@
             
             const rect = canvas.getBoundingClientRect();
             const effectiveCellSize = CELL_SIZE * zoomLevel;
-            const x = Math.floor(viewOffsetX + (e.clientX - rect.left) / effectiveCellSize);
-            const y = Math.floor(viewOffsetY + (e.clientY - rect.top) / effectiveCellSize);
+            const x = Math.floor(viewOffsetX + (e.clientX - rect.left) / effectiveCellSize) - 1;
+            const y = Math.floor(viewOffsetY + (e.clientY - rect.top) / effectiveCellSize) - 1;
             
             if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
+                // Paste mode handling
+                if (pasteMode) {
+                    pasteSelection(x, y);
+                    return;
+                }
+                
+                // Selection tool handling
+                if (selectToolActive) {
+                    if (isInsideSelection(x, y) && selectFirstCorner && selectSecondCorner) {
+                        // Start dragging - clear original cells immediately
+                        isDraggingSelection = true;
+                        dragStartX = x;
+                        dragStartY = y;
+                        
+                        if (!copiedCells) {
+                            copySelection();
+                        }
+                        
+                        // Clear original cell positions when starting to drag
+                        if (!originalCellsCleared) {
+                            const minX = Math.min(selectFirstCorner.x, selectSecondCorner.x);
+                            const minY = Math.min(selectFirstCorner.y, selectSecondCorner.y);
+                            
+                            for (let i = 0; i < copiedCells.cells.length; i++) {
+                                const cell = copiedCells.cells[i];
+                                const originalX = minX + cell.x;
+                                const originalY = minY + cell.y;
+                                if (originalX >= 0 && originalX < GRID_WIDTH && originalY >= 0 && originalY < GRID_HEIGHT) {
+                                    grid[originalY][originalX] = CELL_EMPTY;
+                                }
+                            }
+                            originalCellsCleared = true;
+                            drawGrid();
+                        }
+                    } else {
+                        // Start new selection or set second corner
+                        if (!selectFirstCorner) {
+                            selectFirstCorner = {x, y};
+                            selectSecondCorner = null;
+                            removeSelectionBox();
+                            originalCellsCleared = false;
+                        } else if (!selectSecondCorner) {
+                            selectSecondCorner = {x, y};
+                            previewSelectEnd = null; // Clear preview
+                            drawGrid(); // Redraw to remove preview
+                            createSelectionBox(selectFirstCorner.x, selectFirstCorner.y, selectSecondCorner.x, selectSecondCorner.y);
+                            copySelection();
+                            originalCellsCleared = false;
+                        }
+                    }
+                    return;
+                }
+                
                 if (zoomMode === 1) {
                     // Zoom in mode
                     zoomLevel = Math.min(10, zoomLevel + 1);
@@ -1446,16 +1837,18 @@
                             drawGrid();
                         }
                     } else {
-                        // Normal drawing mode
+                        // Normal drawing mode - adjust coordinates back for direct drawing
                         mouseDown = true;
+                        const drawX = x + 1;  // Compensate for offset for direct drawing
+                        const drawY = y + 1;
                         if (eraserMode) {
                             eraserActive = true;
-                            eraseCircularArea(x, y);
+                            eraseCircularArea(drawX, drawY);
                         } else {
                             // Draw with selected color directly (no toggle)
-                            grid[y][x] = selectedColor;
+                            grid[drawY][drawX] = selectedColor;
                         }
-                        lastCell = {x, y};
+                        lastCell = {x: drawX, y: drawY};
                         drawGrid();
                     }
                 }
@@ -1463,32 +1856,78 @@
         });
         
         canvas.addEventListener('mousemove', (e) => {
-            if (!mouseDown || zoomMode !== 0 || lineToolActive || rectangleToolActive || ovalToolActive) return;
+            // Handle selection dragging
+            if (isDraggingSelection) {
+                const rect = canvas.getBoundingClientRect();
+                const effectiveCellSize = CELL_SIZE * zoomLevel;
+                const x = Math.floor(viewOffsetX + (e.clientX - rect.left) / effectiveCellSize) - 1;
+                const y = Math.floor(viewOffsetY + (e.clientY - rect.top) / effectiveCellSize) - 1;
+                
+                selectionOffsetX = x - dragStartX;
+                selectionOffsetY = y - dragStartY;
+                
+                if (selectFirstCorner && selectSecondCorner) {
+                    const minX = Math.min(selectFirstCorner.x, selectSecondCorner.x) + selectionOffsetX;
+                    const minY = Math.min(selectFirstCorner.y, selectSecondCorner.y) + selectionOffsetY;
+                    const maxX = Math.max(selectFirstCorner.x, selectSecondCorner.x) + selectionOffsetX;
+                    const maxY = Math.max(selectFirstCorner.y, selectSecondCorner.y) + selectionOffsetY;
+                    
+                    createSelectionBox(minX, minY, maxX, maxY);
+                    
+                    // Show live preview of cells at new position
+                    drawGrid(); // First draw the grid without the moved cells
+                    
+                    // Draw the cells at their new position
+                    const baseX = Math.min(selectFirstCorner.x, selectSecondCorner.x);
+                    const baseY = Math.min(selectFirstCorner.y, selectSecondCorner.y);
+                    const newX = baseX + selectionOffsetX;
+                    const newY = baseY + selectionOffsetY;
+                    
+                    for (let i = 0; i < copiedCells.cells.length; i++) {
+                        const cell = copiedCells.cells[i];
+                        const gridX = newX + cell.x;
+                        const gridY = newY + cell.y;
+                        if (gridX >= 0 && gridX < GRID_WIDTH && gridY >= 0 && gridY < GRID_HEIGHT) {
+                            const drawX = (gridX - viewOffsetX) * CELL_SIZE;
+                            const drawY = (gridY - viewOffsetY) * CELL_SIZE;
+                            ctx.fillStyle = COLORS[cell.value];
+                            ctx.fillRect(drawX, drawY, CELL_SIZE, CELL_SIZE);
+                        }
+                    }
+                }
+                return;
+            }
+            
+            if (!mouseDown || zoomMode !== 0 || lineToolActive || rectangleToolActive || ovalToolActive || selectToolActive) return;
             const rect = canvas.getBoundingClientRect();
             const effectiveCellSize = CELL_SIZE * zoomLevel;
-            const x = Math.floor(viewOffsetX + (e.clientX - rect.left) / effectiveCellSize);
-            const y = Math.floor(viewOffsetY + (e.clientY - rect.top) / effectiveCellSize);
+            const x = Math.floor(viewOffsetX + (e.clientX - rect.left) / effectiveCellSize) - 1;
+            const y = Math.floor(viewOffsetY + (e.clientY - rect.top) / effectiveCellSize) - 1;
             
             if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
-                if (!lastCell || lastCell.x !== x || lastCell.y !== y) {
+                // Adjust coordinates for direct drawing
+                const drawX = x + 1;
+                const drawY = y + 1;
+                
+                if (!lastCell || lastCell.x !== drawX || lastCell.y !== drawY) {
                     if (eraserMode) {
                         eraserActive = true;
                         // Interpolate eraser between last position and current position
                         if (lastCell) {
-                            eraseCellsBetween(lastCell.x, lastCell.y, x, y);
+                            eraseCellsBetween(lastCell.x, lastCell.y, drawX, drawY);
                         } else {
-                            eraseCircularArea(x, y);
+                            eraseCircularArea(drawX, drawY);
                         }
                     } else {
                         // Interpolate drawing between last position and current position
                         if (lastCell) {
-                            drawCellsBetween(lastCell.x, lastCell.y, x, y, selectedColor);
+                            drawCellsBetween(lastCell.x, lastCell.y, drawX, drawY, selectedColor);
                         } else {
                             // First cell
-                            grid[y][x] = selectedColor;
+                            grid[drawY][drawX] = selectedColor;
                         }
                     }
-                    lastCell = {x, y};
+                    lastCell = {x: drawX, y: drawY};
                     drawGrid();
                 }
             }
@@ -1498,12 +1937,12 @@
         canvas.addEventListener('mousemove', (e) => {
             const rect = canvas.getBoundingClientRect();
             const effectiveCellSize = CELL_SIZE * zoomLevel;
-            const x = Math.floor(viewOffsetX + (e.clientX - rect.left) / effectiveCellSize);
-            const y = Math.floor(viewOffsetY + (e.clientY - rect.top) / effectiveCellSize);
+            const x = Math.floor(viewOffsetX + (e.clientX - rect.left) / effectiveCellSize) - 1;
+            const y = Math.floor(viewOffsetY + (e.clientY - rect.top) / effectiveCellSize) - 1;
             
-            // Track eraser cursor position
+            // Track eraser cursor position - adjust for drawing offset
             if (eraserMode && x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
-                eraserCursorPos = {x, y};
+                eraserCursorPos = {x: x + 1, y: y + 1};
                 canvas.classList.add('eraser-cursor');
                 drawGrid();
             } else if (eraserMode) {
@@ -1527,6 +1966,11 @@
             } else if (ovalToolActive && ovalStartPoint) {
                 if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
                     previewOvalEnd = {x, y};
+                    drawGrid();
+                }
+            } else if (selectToolActive && selectFirstCorner && !selectSecondCorner) {
+                if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
+                    previewSelectEnd = {x, y};
                     drawGrid();
                 }
             }
@@ -1559,10 +2003,63 @@
             const touch = e.touches[0];
             const rect = canvas.getBoundingClientRect();
             const effectiveCellSize = CELL_SIZE * zoomLevel;
-            const x = Math.floor(viewOffsetX + (touch.clientX - rect.left) / effectiveCellSize);
-            const y = Math.floor(viewOffsetY + (touch.clientY - rect.top) / effectiveCellSize);
+            const x = Math.floor(viewOffsetX + (touch.clientX - rect.left) / effectiveCellSize) - 1;
+            const y = Math.floor(viewOffsetY + (touch.clientY - rect.top) / effectiveCellSize) - 1;
             
             if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
+                // Paste mode handling
+                if (pasteMode) {
+                    pasteSelection(x, y);
+                    return;
+                }
+                
+                // Selection tool handling
+                if (selectToolActive) {
+                    if (isInsideSelection(x, y) && selectFirstCorner && selectSecondCorner) {
+                        // Start dragging - clear original cells immediately
+                        isDraggingSelection = true;
+                        dragStartX = x;
+                        dragStartY = y;
+                        
+                        if (!copiedCells) {
+                            copySelection();
+                        }
+                        
+                        // Clear original cell positions when starting to drag
+                        if (!originalCellsCleared) {
+                            const minX = Math.min(selectFirstCorner.x, selectSecondCorner.x);
+                            const minY = Math.min(selectFirstCorner.y, selectSecondCorner.y);
+                            
+                            for (let i = 0; i < copiedCells.cells.length; i++) {
+                                const cell = copiedCells.cells[i];
+                                const originalX = minX + cell.x;
+                                const originalY = minY + cell.y;
+                                if (originalX >= 0 && originalX < GRID_WIDTH && originalY >= 0 && originalY < GRID_HEIGHT) {
+                                    grid[originalY][originalX] = CELL_EMPTY;
+                                }
+                            }
+                            originalCellsCleared = true;
+                            drawGrid();
+                        }
+                    } else {
+                        // Start new selection or set second corner
+                        if (!selectFirstCorner) {
+                            selectFirstCorner = {x, y};
+                            selectSecondCorner = null;
+                            removeSelectionBox();
+                            originalCellsCleared = false;
+                        } else if (!selectSecondCorner) {
+                            selectSecondCorner = {x, y};
+                            previewSelectEnd = null; // Clear preview
+                            drawGrid(); // Redraw to remove preview
+                            createSelectionBox(selectFirstCorner.x, selectFirstCorner.y, selectSecondCorner.x, selectSecondCorner.y);
+                            copySelection();
+                            originalCellsCleared = false;
+                        }
+                    }
+                    return;
+                }
+                
                 if (zoomMode === 1) {
                     // Zoom in mode
                     zoomLevel = Math.min(10, zoomLevel + 1);
@@ -1622,16 +2119,18 @@
                             drawGrid();
                         }
                     } else {
-                        // Normal drawing mode
+                        // Normal drawing mode - adjust coordinates back for direct drawing
+                        const drawX = x + 1;
+                        const drawY = y + 1;
                         if (eraserMode) {
                             eraserActive = true;
-                            eraserCursorPos = {x, y}; // Set cursor position for visual feedback
-                            eraseCircularArea(x, y);
+                            eraserCursorPos = {x: drawX, y: drawY}; // Set cursor position for visual feedback
+                            eraseCircularArea(drawX, drawY);
                         } else {
                             // Draw with selected color directly (no toggle)
-                            grid[y][x] = selectedColor;
+                            grid[drawY][drawX] = selectedColor;
                         }
-                        lastTouchCell = {x, y};
+                        lastTouchCell = {x: drawX, y: drawY};
                         drawGrid();
                     }
                 }
@@ -1639,35 +2138,76 @@
         });
         
         canvas.addEventListener('touchmove', (e) => {
-            if (zoomMode !== 0 || lineToolActive || rectangleToolActive || ovalToolActive) return;
             e.preventDefault(); // Prevent scrolling while drawing
             const touch = e.touches[0];
             const rect = canvas.getBoundingClientRect();
             const effectiveCellSize = CELL_SIZE * zoomLevel;
-            const x = Math.floor(viewOffsetX + (touch.clientX - rect.left) / effectiveCellSize);
-            const y = Math.floor(viewOffsetY + (touch.clientY - rect.top) / effectiveCellSize);
+            const x = Math.floor(viewOffsetX + (touch.clientX - rect.left) / effectiveCellSize) - 1;
+            const y = Math.floor(viewOffsetY + (touch.clientY - rect.top) / effectiveCellSize) - 1;
+            
+            // Handle selection dragging
+            if (isDraggingSelection) {
+                selectionOffsetX = x - dragStartX;
+                selectionOffsetY = y - dragStartY;
+                
+                if (selectFirstCorner && selectSecondCorner) {
+                    const minX = Math.min(selectFirstCorner.x, selectSecondCorner.x) + selectionOffsetX;
+                    const minY = Math.min(selectFirstCorner.y, selectSecondCorner.y) + selectionOffsetY;
+                    const maxX = Math.max(selectFirstCorner.x, selectSecondCorner.x) + selectionOffsetX;
+                    const maxY = Math.max(selectFirstCorner.y, selectSecondCorner.y) + selectionOffsetY;
+                    
+                    createSelectionBox(minX, minY, maxX, maxY);
+                    
+                    // Show live preview of cells at new position
+                    drawGrid();
+                    
+                    const baseX = Math.min(selectFirstCorner.x, selectSecondCorner.x);
+                    const baseY = Math.min(selectFirstCorner.y, selectSecondCorner.y);
+                    const newX = baseX + selectionOffsetX;
+                    const newY = baseY + selectionOffsetY;
+                    
+                    for (let i = 0; i < copiedCells.cells.length; i++) {
+                        const cell = copiedCells.cells[i];
+                        const gridX = newX + cell.x;
+                        const gridY = newY + cell.y;
+                        if (gridX >= 0 && gridX < GRID_WIDTH && gridY >= 0 && gridY < GRID_HEIGHT) {
+                            const drawX = (gridX - viewOffsetX) * CELL_SIZE;
+                            const drawY = (gridY - viewOffsetY) * CELL_SIZE;
+                            ctx.fillStyle = COLORS[cell.value];
+                            ctx.fillRect(drawX, drawY, CELL_SIZE, CELL_SIZE);
+                        }
+                    }
+                }
+                return;
+            }
+            
+            if (zoomMode !== 0 || lineToolActive || rectangleToolActive || ovalToolActive || selectToolActive) return;
             
             if (x >= 0 && x < GRID_WIDTH && y >= 0 && y < GRID_HEIGHT) {
-                if (!lastTouchCell || lastTouchCell.x !== x || lastTouchCell.y !== y) {
+                // Adjust coordinates for direct drawing
+                const drawX = x + 1;
+                const drawY = y + 1;
+                
+                if (!lastTouchCell || lastTouchCell.x !== drawX || lastTouchCell.y !== drawY) {
                     if (eraserMode) {
                         eraserActive = true;
-                        eraserCursorPos = {x, y}; // Set cursor position for visual feedback
+                        eraserCursorPos = {x: drawX, y: drawY}; // Set cursor position for visual feedback
                         // Interpolate eraser between last position and current position
                         if (lastTouchCell) {
-                            eraseCellsBetween(lastTouchCell.x, lastTouchCell.y, x, y);
+                            eraseCellsBetween(lastTouchCell.x, lastTouchCell.y, drawX, drawY);
                         } else {
-                            eraseCircularArea(x, y);
+                            eraseCircularArea(drawX, drawY);
                         }
                     } else {
                         // Interpolate drawing between last position and current position
                         if (lastTouchCell) {
-                            drawCellsBetween(lastTouchCell.x, lastTouchCell.y, x, y, selectedColor);
+                            drawCellsBetween(lastTouchCell.x, lastTouchCell.y, drawX, drawY, selectedColor);
                         } else {
                             // First cell
-                            grid[y][x] = selectedColor;
+                            grid[drawY][drawX] = selectedColor;
                         }
                     }
-                    lastTouchCell = {x, y};
+                    lastTouchCell = {x: drawX, y: drawY};
                     drawGrid();
                 }
             }
@@ -1675,6 +2215,15 @@
         
         canvas.addEventListener('touchend', (e) => {
             e.preventDefault();
+            
+            if (isDraggingSelection) {
+                isDraggingSelection = false;
+                // Apply the selection to update positions
+                if (selectToolActive && selectFirstCorner && selectSecondCorner && copiedCells) {
+                    applySelection();
+                }
+            }
+            
             lastTouchCell = null;
             if (eraserActive) {
                 eraserActive = false;
@@ -1684,6 +2233,13 @@
         });
         
         canvas.addEventListener('mouseup', () => {
+            if (isDraggingSelection) {
+                isDraggingSelection = false;
+                // Apply the selection to update positions
+                if (selectToolActive && selectFirstCorner && selectSecondCorner && copiedCells) {
+                    applySelection();
+                }
+            }
             mouseDown = false;
             lastCell = null;
             if (eraserActive) {
@@ -1695,6 +2251,17 @@
         // Control events
         document.getElementById('playPause').addEventListener('click', function() {
             deactivateZoom();
+            
+            // If trying to play, deactivate select tool first
+            if (!isPlaying && selectToolActive) {
+                deactivateSelectTool();
+            }
+            
+            // Don't allow playing while select tool is active
+            if (selectToolActive) {
+                return;
+            }
+            
             isPlaying = !isPlaying;
             this.textContent = isPlaying ? '⏸ Pause' : '▶ Play';
             if (isPlaying) {
@@ -1710,12 +2277,140 @@
         
         document.getElementById('clear').addEventListener('click', () => {
             deactivateZoom();
+            deactivateSelectTool();
             clearGrid();
         });
         
         document.getElementById('randomButton').addEventListener('click', () => {
             deactivateZoom();
             randomGrid();
+        });
+        
+        // Select button
+        document.getElementById('selectButton').addEventListener('click', function() {
+            if (selectToolActive) {
+                // Deactivate select tool - leave cells where they are
+                deactivateSelectTool();
+            } else {
+                // Activate select tool
+                selectToolActive = true;
+                
+                // Pause game
+                if (isPlaying) {
+                    isPlaying = false;
+                    document.getElementById('playPause').textContent = '▶ Play';
+                }
+                
+                // Deactivate other tools
+                deactivateZoom();
+                deactivateLineTool();
+                deactivateRectangleTool();
+                deactivateOvalTool();
+                deactivateEraser();
+                deactivatePasteMode();
+                
+                this.classList.add('active');
+                
+                selectFirstCorner = null;
+                selectSecondCorner = null;
+                previewSelectEnd = null; // Clear preview
+                            drawGrid(); // Redraw to remove preview
+                removeSelectionBox();
+                originalCellsCleared = false;
+            }
+        });
+        
+        // Paste button
+        document.getElementById('pasteButton').addEventListener('click', function() {
+            if (!copiedCells || !copiedCells.cells || copiedCells.cells.length === 0) {
+                return; // No cells to paste
+            }
+            
+            pasteMode = !pasteMode;
+            this.classList.toggle('active');
+            
+            if (pasteMode) {
+                // Deactivate other tools when paste mode is activated
+                deactivateZoom();
+                deactivateLineTool();
+                deactivateRectangleTool();
+                deactivateOvalTool();
+                deactivateEraser();
+                deactivateSelectTool();
+            }
+        });
+        
+        // Save and Load buttons
+        document.getElementById('saveButton').addEventListener('click', () => {
+            saveGame();
+        });
+        
+        // Function to reattach modal event listeners after innerHTML replacement
+        function reattachModalEventListeners() {
+            // Close modal button
+            const closeBtn = document.getElementById('closeModal');
+            if (closeBtn) {
+                closeBtn.onclick = () => {
+                    document.getElementById('loadModal').style.display = 'none';
+                };
+            }
+            
+            // Export All button
+            const exportBtn = document.getElementById('exportAllButton');
+            if (exportBtn) {
+                exportBtn.onclick = () => {
+                    exportAllRuleSets();
+                };
+            }
+            
+            // Import button
+            const importBtn = document.getElementById('importButton');
+            if (importBtn) {
+                importBtn.onclick = () => {
+                    document.getElementById('importFileInput').click();
+                };
+            }
+        }
+        
+        document.getElementById('loadButton').addEventListener('click', () => {
+            loadGame();
+        });
+        
+        // Load Pattern button
+        document.getElementById('loadPatternButton').addEventListener('click', function() {
+            if (isMobile) return; // Don't show on mobile
+            loadPatternModal();
+        });
+        
+        // Close modal button
+        document.getElementById('closeModal').addEventListener('click', () => {
+            document.getElementById('loadModal').style.display = 'none';
+        });
+        
+        // Export All button
+        document.getElementById('exportAllButton').addEventListener('click', () => {
+            exportAllRuleSets();
+        });
+        
+        // Import button
+        document.getElementById('importButton').addEventListener('click', () => {
+            document.getElementById('importFileInput').click();
+        });
+        
+        // Import file handler
+        document.getElementById('importFileInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                importRuleSets(file);
+            }
+            e.target.value = ''; // Reset input
+        });
+        
+        // Close modal when clicking outside
+        document.getElementById('loadModal').addEventListener('click', (e) => {
+            if (e.target.id === 'loadModal') {
+                document.getElementById('loadModal').style.display = 'none';
+            }
         });
         
         document.getElementById('toggleNeighborsFight').addEventListener('click', function() {
@@ -1749,6 +2444,8 @@
             deactivateRectangleTool();
             deactivateOvalTool();
             deactivateEraser();
+            deactivateSelectTool();
+            deactivatePasteMode();
             lineToolActive = !lineToolActive;
             this.classList.toggle('active');
             
@@ -1764,6 +2461,8 @@
             deactivateLineTool();
             deactivateOvalTool();
             deactivateEraser();
+            deactivateSelectTool();
+            deactivatePasteMode();
             rectangleToolActive = !rectangleToolActive;
             this.classList.toggle('active');
             
@@ -1779,6 +2478,8 @@
             deactivateLineTool();
             deactivateRectangleTool();
             deactivateEraser();
+            deactivateSelectTool();
+            deactivatePasteMode();
             ovalToolActive = !ovalToolActive;
             this.classList.toggle('active');
             
@@ -1791,6 +2492,8 @@
         
         document.getElementById('zoomButton').addEventListener('click', function() {
             deactivateEraser();
+            deactivateSelectTool();
+            deactivatePasteMode();
             zoomMode = (zoomMode + 1) % 3; // Cycle through 0, 1, 2
             
             if (zoomMode === 0) {
@@ -1809,9 +2512,11 @@
         function deactivateZoom() {
             if (zoomMode !== 0) {
                 zoomMode = 0;
+                previewSelectEnd = null; // Clear selection preview
                 const zoomButton = document.getElementById('zoomButton');
                 zoomButton.textContent = 'Zoom: OFF';
                 zoomButton.classList.remove('active');
+                drawGrid(); // Redraw to clear preview
             }
         }
         
@@ -1828,6 +2533,7 @@
                 lineToolActive = false;
                 lineStartPoint = null;
                 previewLineEnd = null;
+                previewSelectEnd = null; // Clear selection preview
                 const lineButton = document.getElementById('lineToolButton');
                 lineButton.classList.remove('active');
                 drawGrid(); // Redraw to clear preview line
@@ -1840,6 +2546,7 @@
                 rectangleToolActive = false;
                 rectangleStartPoint = null;
                 previewRectangleEnd = null;
+                previewSelectEnd = null; // Clear selection preview
                 const rectButton = document.getElementById('rectangleToolButton');
                 rectButton.classList.remove('active');
                 drawGrid();
@@ -1852,6 +2559,7 @@
                 ovalToolActive = false;
                 ovalStartPoint = null;
                 previewOvalEnd = null;
+                previewSelectEnd = null; // Clear selection preview
                 const ovalButton = document.getElementById('ovalToolButton');
                 ovalButton.classList.remove('active');
                 drawGrid();
@@ -1864,12 +2572,870 @@
                 eraserMode = false;
                 eraserSize = 0;
                 eraserCursorPos = null;
+                previewSelectEnd = null; // Clear selection preview
                 canvas.classList.remove('eraser-cursor');
                 const eraserButton = document.getElementById('eraserButton');
-                eraserButton.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser';
                 eraserButton.classList.remove('active');
                 drawGrid();
             }
+        }
+        
+        // Selection tool functions
+        function createSelectionBox(x1, y1, x2, y2) {
+            removeSelectionBox();
+            
+            const rect = canvas.getBoundingClientRect();
+            const minX = Math.min(x1, x2);
+            const minY = Math.min(y1, y2);
+            const maxX = Math.max(x1, x2);
+            const maxY = Math.max(y1, y2);
+            
+            const effectiveCellSize = CELL_SIZE * zoomLevel;
+            const pixelX1 = (minX - viewOffsetX) * effectiveCellSize;
+            const pixelY1 = (minY - viewOffsetY) * effectiveCellSize;
+            const pixelX2 = (maxX + 1 - viewOffsetX) * effectiveCellSize;
+            const pixelY2 = (maxY + 1 - viewOffsetY) * effectiveCellSize;
+            
+            selectionBox = document.createElement('div');
+            selectionBox.className = 'selection-box';
+            // Use fixed positioning with scroll offset for accurate placement
+            selectionBox.style.left = (rect.left + window.scrollX + pixelX1) + 'px';
+            selectionBox.style.top = (rect.top + window.scrollY + pixelY1) + 'px';
+            selectionBox.style.width = (pixelX2 - pixelX1) + 'px';
+            selectionBox.style.height = (pixelY2 - pixelY1) + 'px';
+            document.body.appendChild(selectionBox);
+            
+            // Create save button (bottom-right corner) - only if not mobile
+            if (!isMobile) {
+                saveButton = document.createElement('button');
+                saveButton.className = 'save-button';
+                saveButton.textContent = '💾';
+                saveButton.title = 'Save Pattern';
+                saveButton.style.right = '-24px';
+                saveButton.style.bottom = '-24px';
+                saveButton.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    savePattern();
+                });
+                selectionBox.appendChild(saveButton);
+            }
+        }
+        
+        function removeSelectionBox() {
+            if (selectionBox) {
+                selectionBox.remove();
+                selectionBox = null;
+            }
+            if (saveButton) {
+                saveButton.remove();
+                saveButton = null;
+            }
+        }
+        
+        function copySelection() {
+            if (!selectFirstCorner || !selectSecondCorner) return;
+            
+            const minX = Math.min(selectFirstCorner.x, selectSecondCorner.x);
+            const minY = Math.min(selectFirstCorner.y, selectSecondCorner.y);
+            const maxX = Math.max(selectFirstCorner.x, selectSecondCorner.x);
+            const maxY = Math.max(selectFirstCorner.y, selectSecondCorner.y);
+            
+            // Store only living cells with their relative positions
+            copiedCells = {
+                minX: minX,
+                minY: minY,
+                cells: [] // Array of {x, y, value} for living cells only
+            };
+            
+            for (let y = minY; y <= maxY; y++) {
+                for (let x = minX; x <= maxX; x++) {
+                    if (grid[y][x] !== CELL_EMPTY) {
+                        copiedCells.cells.push({
+                            x: x - minX,  // Store relative position
+                            y: y - minY,
+                            value: grid[y][x]
+                        });
+                    }
+                }
+            }
+        }
+        
+        function pasteSelection(targetX, targetY) {
+            if (!copiedCells || !copiedCells.cells) return;
+            
+            // Calculate the center of the copied cells pattern
+            let minRelX = Infinity, maxRelX = -Infinity;
+            let minRelY = Infinity, maxRelY = -Infinity;
+            
+            for (let i = 0; i < copiedCells.cells.length; i++) {
+                const cell = copiedCells.cells[i];
+                minRelX = Math.min(minRelX, cell.x);
+                maxRelX = Math.max(maxRelX, cell.x);
+                minRelY = Math.min(minRelY, cell.y);
+                maxRelY = Math.max(maxRelY, cell.y);
+            }
+            
+            // Calculate center offset from minRelX/minRelY
+            const centerOffsetX = minRelX + Math.floor((maxRelX - minRelX) / 2);
+            const centerOffsetY = minRelY + Math.floor((maxRelY - minRelY) / 2);
+            
+            // Paste centered on the target position
+            for (let i = 0; i < copiedCells.cells.length; i++) {
+                const cell = copiedCells.cells[i];
+                const gridX = targetX + cell.x - centerOffsetX;
+                const gridY = targetY + cell.y - centerOffsetY;
+                if (gridX >= 0 && gridX < GRID_WIDTH && gridY >= 0 && gridY < GRID_HEIGHT) {
+                    grid[gridY][gridX] = cell.value;
+                }
+            }
+            drawGrid();
+        }
+        
+        function applySelection() {
+            if (!selectFirstCorner || !selectSecondCorner || !copiedCells || !copiedCells.cells) return;
+            
+            const minX = Math.min(selectFirstCorner.x, selectSecondCorner.x);
+            const minY = Math.min(selectFirstCorner.y, selectSecondCorner.y);
+            const maxX = Math.max(selectFirstCorner.x, selectSecondCorner.x);
+            const maxY = Math.max(selectFirstCorner.y, selectSecondCorner.y);
+            
+            // Place cells at new location (original cells already cleared during drag)
+            const newX = minX + selectionOffsetX;
+            const newY = minY + selectionOffsetY;
+            
+            for (let i = 0; i < copiedCells.cells.length; i++) {
+                const cell = copiedCells.cells[i];
+                const gridX = newX + cell.x;
+                const gridY = newY + cell.y;
+                if (gridX >= 0 && gridX < GRID_WIDTH && gridY >= 0 && gridY < GRID_HEIGHT) {
+                    grid[gridY][gridX] = cell.value;
+                }
+            }
+            
+            // Update selection corners to new position so we can drag from there again
+            selectFirstCorner.x = minX + selectionOffsetX;
+            selectFirstCorner.y = minY + selectionOffsetY;
+            selectSecondCorner.x = maxX + selectionOffsetX;
+            selectSecondCorner.y = maxY + selectionOffsetY;
+            
+            // Update the selection box to new position
+            createSelectionBox(selectFirstCorner.x, selectFirstCorner.y, selectSecondCorner.x, selectSecondCorner.y);
+            
+            selectionOffsetX = 0;
+            selectionOffsetY = 0;
+            originalCellsCleared = false; // Reset for next drag
+            drawGrid();
+        }
+        
+        function isInsideSelection(x, y) {
+            if (!selectFirstCorner || !selectSecondCorner) return false;
+            
+            const minX = Math.min(selectFirstCorner.x, selectSecondCorner.x);
+            const minY = Math.min(selectFirstCorner.y, selectSecondCorner.y);
+            const maxX = Math.max(selectFirstCorner.x, selectSecondCorner.x);
+            const maxY = Math.max(selectFirstCorner.y, selectSecondCorner.y);
+            
+            return x >= minX && x <= maxX && y >= minY && y <= maxY;
+        }
+        
+        function deactivateSelectTool() {
+            if (selectToolActive) {
+                // If cells were moved and not yet finalized, place them at current position
+                if (selectFirstCorner && selectSecondCorner && copiedCells && originalCellsCleared && (selectionOffsetX !== 0 || selectionOffsetY !== 0)) {
+                    applySelection();
+                }
+                selectToolActive = false;
+                selectFirstCorner = null;
+                selectSecondCorner = null;
+                previewSelectEnd = null; // Clear preview
+                            drawGrid(); // Redraw to remove preview
+                removeSelectionBox();
+                selectionOffsetX = 0;
+                selectionOffsetY = 0;
+                originalCellsCleared = false;
+                const selectButton = document.getElementById('selectButton');
+                selectButton.classList.remove('active');
+            }
+        }
+        
+        function deactivatePasteMode() {
+            if (pasteMode) {
+                pasteMode = false;
+                previewSelectEnd = null; // Clear selection preview
+                const pasteButton = document.getElementById('pasteButton');
+                pasteButton.classList.remove('active');
+                drawGrid(); // Redraw to clear preview
+            }
+        }
+        
+        // Pattern Save/Load functions
+        function savePattern() {
+            if (!selectFirstCorner || !selectSecondCorner) return;
+            
+            const minX = Math.min(selectFirstCorner.x, selectSecondCorner.x);
+            const minY = Math.min(selectFirstCorner.y, selectSecondCorner.y);
+            const maxX = Math.max(selectFirstCorner.x, selectSecondCorner.x);
+            const maxY = Math.max(selectFirstCorner.y, selectSecondCorner.y);
+            
+            // Store only living cells with their relative positions
+            const patternCells = [];
+            for (let y = minY; y <= maxY; y++) {
+                for (let x = minX; x <= maxX; x++) {
+                    if (grid[y][x] !== CELL_EMPTY) {
+                        patternCells.push({
+                            x: x - minX,
+                            y: y - minY,
+                            value: grid[y][x]
+                        });
+                    }
+                }
+            }
+            
+            if (patternCells.length === 0) {
+                showCustomAlert('No living cells in selection to save!');
+                return;
+            }
+            
+            // Get current rule signature
+            const signature = getCurrentRuleSignature();
+            const ruleSets = getAllRuleSets();
+            
+            // Check if this rule set already exists
+            let ruleSetName = findRuleSetBySignature(signature);
+            
+            if (ruleSetName) {
+                // Rule set exists, just save the pattern
+                showCustomPrompt('Saving Pattern', 'Enter a name for this pattern:', 'Pattern ' + (new Date().toLocaleTimeString()), (patternName) => {
+                    if (!patternName) return;
+                    
+                    const pattern = {
+                        name: patternName,
+                        width: maxX - minX + 1,
+                        height: maxY - minY + 1,
+                        cells: patternCells,
+                        timestamp: Date.now()
+                    };
+                    
+                    ruleSets[ruleSetName].patterns.push(pattern);
+                    
+                    if (saveAllRuleSets(ruleSets)) {
+                        showCustomAlert('Pattern "' + patternName + '" saved to "' + ruleSetName + '"!');
+                    } else {
+                        showCustomAlert('Failed to save pattern. Storage might be full.');
+                    }
+                });
+            } else {
+                // New rule set, prompt for name
+                const currentRules = {
+                    birthMin: BIRTH_MIN_NEIGHBORS,
+                    birthMax: BIRTH_MAX_NEIGHBORS,
+                    survivalMin: SURVIVAL_MIN_NEIGHBORS,
+                    survivalMax: SURVIVAL_MAX_NEIGHBORS,
+                    evolutionMin: EVOLUTION_MIN_NEIGHBORS,
+                    evolutionMax: EVOLUTION_MAX_NEIGHBORS,
+                    deathMin: DEATH_MIN_NEIGHBORS,
+                    colorExpansion: COLOR_EXPANSION_RATE,
+                    neighborsFight: neighborsFightEnabled,
+                    movingCells: movingCellsEnabled
+                };
+                
+                showCustomPrompt('New Rule Set Detected', 'Name this rule set:\n' + getRuleDescription(currentRules), 'Custom Rules ' + Object.keys(ruleSets).length, (newRuleSetName) => {
+                    if (!newRuleSetName) return;
+                    
+                    // Check if name already exists
+                    if (ruleSets[newRuleSetName]) {
+                        showCustomAlert('Rule set name already exists. Please choose a different name.');
+                        return;
+                    }
+                    
+                    // Now prompt for pattern name
+                    showCustomPrompt('Saving Pattern', 'Enter a name for this pattern:', 'Pattern ' + (new Date().toLocaleTimeString()), (patternName) => {
+                        if (!patternName) return;
+                        
+                        const pattern = {
+                            name: patternName,
+                            width: maxX - minX + 1,
+                            height: maxY - minY + 1,
+                            cells: patternCells,
+                            timestamp: Date.now()
+                        };
+                        
+                        // Create new rule set
+                        ruleSets[newRuleSetName] = {
+                            signature: signature,
+                            rules: currentRules,
+                            patterns: [pattern],
+                            created: Date.now()
+                        };
+                        
+                        if (saveAllRuleSets(ruleSets)) {
+                            showCustomAlert('Rule set "' + newRuleSetName + '" created!\nPattern "' + patternName + '" saved!');
+                        } else {
+                            showCustomAlert('Failed to save. Storage might be full.');
+                        }
+                    });
+                });
+            }
+        }
+        
+        // Custom alert dialog
+        function showCustomAlert(message) {
+            const modal = document.getElementById('loadModal');
+            const content = modal.querySelector('.load-modal-content');
+            
+            // Safety check
+            if (!content) {
+                console.error('Modal content not found');
+                alert(message); // Fallback to native alert
+                return;
+            }
+            
+            // Store original content
+            const originalContent = content.innerHTML;
+            
+            content.innerHTML = `
+                <div class="load-modal-title">Notice</div>
+                <div style="padding: 20px 0; text-align: center;">${message}</div>
+                <button class="close-modal" id="alertOkButton">OK</button>
+            `;
+            modal.style.display = 'flex';
+            
+            // Restore original content when closed
+            const okButton = document.getElementById('alertOkButton');
+            okButton.onclick = () => {
+                modal.style.display = 'none';
+                content.innerHTML = originalContent;
+                // Re-attach event listeners for the buttons
+                reattachModalEventListeners();
+            };
+        }
+        
+        // Custom prompt dialog
+        function showCustomPrompt(title, message, defaultValue, callback) {
+            const modal = document.getElementById('loadModal');
+            const content = modal.querySelector('.load-modal-content');
+            
+            // Store original content
+            const originalContent = content.innerHTML;
+            
+            content.innerHTML = `
+                <div class="load-modal-title">${title}</div>
+                <div style="padding: 10px 0;">${message}</div>
+                <input type="text" id="promptInput" value="${defaultValue}" style="width: 100%; padding: 10px; background: #2a2a2a; color: #fff; border: 1px solid #444; border-radius: 5px; margin: 10px 0; font-size: 14px;">
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <button class="close-modal" style="width: 50%;" id="promptCancelButton">Cancel</button>
+                    <button class="close-modal" style="width: 50%; background: #2a6a2a;" id="promptOkButton">OK</button>
+                </div>
+            `;
+            modal.style.display = 'flex';
+            
+            const input = document.getElementById('promptInput');
+            input.focus();
+            input.select();
+            
+            const cancelButton = document.getElementById('promptCancelButton');
+            const okButton = document.getElementById('promptOkButton');
+            
+            const handleCancel = () => {
+                modal.style.display = 'none';
+                content.innerHTML = originalContent;
+                reattachModalEventListeners();
+            };
+            
+            const handleOk = () => {
+                const value = input.value;
+                modal.style.display = 'none';
+                content.innerHTML = originalContent;
+                reattachModalEventListeners();
+                callback(value);
+            };
+            
+            cancelButton.onclick = handleCancel;
+            okButton.onclick = handleOk;
+            input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    handleOk();
+                }
+            });
+        }
+        
+        // Custom confirm dialog
+        function showCustomConfirm(message, callback) {
+            const modal = document.getElementById('loadModal');
+            const content = modal.querySelector('.load-modal-content');
+            
+            // Store original content
+            const originalContent = content.innerHTML;
+            
+            content.innerHTML = `
+                <div class="load-modal-title">Confirm</div>
+                <div style="padding: 20px 0; text-align: center;">${message}</div>
+                <div style="display: flex; gap: 10px;">
+                    <button class="close-modal" style="width: 50%;" id="confirmCancelButton">Cancel</button>
+                    <button class="close-modal" style="width: 50%; background: #6a2a2a;" id="confirmOkButton">Delete</button>
+                </div>
+            `;
+            modal.style.display = 'flex';
+            
+            const cancelButton = document.getElementById('confirmCancelButton');
+            const okButton = document.getElementById('confirmOkButton');
+            
+            cancelButton.onclick = () => {
+                modal.style.display = 'none';
+                content.innerHTML = originalContent;
+                reattachModalEventListeners();
+            };
+            
+            okButton.onclick = () => {
+                modal.style.display = 'none';
+                content.innerHTML = originalContent;
+                reattachModalEventListeners();
+                callback();
+            };
+        }
+        
+        function loadPatternModal() {
+            const modal = document.getElementById('loadModal');
+            const patternsList = document.getElementById('savedPatternsList');
+            
+            const ruleSets = getAllRuleSets();
+            const ruleSetNames = Object.keys(ruleSets);
+            
+            if (ruleSetNames.length === 0) {
+                patternsList.innerHTML = '<div class="no-patterns-message">No saved patterns yet. Use the Select tool and Save button to save patterns!</div>';
+            } else {
+                patternsList.innerHTML = '';
+                
+                ruleSetNames.forEach(ruleSetName => {
+                    const ruleSet = ruleSets[ruleSetName];
+                    const patternCount = ruleSet.patterns.length;
+                    
+                    // Create rule set section
+                    const section = document.createElement('div');
+                    section.className = 'rule-set-section';
+                    
+                    // Create header
+                    const header = document.createElement('div');
+                    header.className = 'rule-set-header';
+                    
+                    const titleDiv = document.createElement('div');
+                    titleDiv.style.flex = '1';
+                    
+                    const expandIcon = document.createElement('span');
+                    expandIcon.className = 'expand-icon';
+                    expandIcon.textContent = '▶';
+                    
+                    const title = document.createElement('span');
+                    title.className = 'rule-set-title';
+                    title.textContent = ruleSetName;
+                    
+                    const info = document.createElement('div');
+                    info.className = 'rule-set-info';
+                    info.textContent = getRuleDescription(ruleSet.rules);
+                    
+                    titleDiv.appendChild(expandIcon);
+                    titleDiv.appendChild(title);
+                    titleDiv.appendChild(info);
+                    
+                    const count = document.createElement('span');
+                    count.className = 'rule-set-count';
+                    count.textContent = patternCount + (patternCount === 1 ? ' pattern' : ' patterns');
+                    
+                    const actions = document.createElement('div');
+                    actions.className = 'rule-set-actions';
+                    
+                    const exportBtn = document.createElement('button');
+                    exportBtn.className = 'rule-set-action-btn';
+                    exportBtn.textContent = 'Export';
+                    exportBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        exportRuleSet(ruleSetName);
+                    };
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'rule-set-action-btn';
+                    deleteBtn.textContent = 'Delete';
+                    deleteBtn.style.background = '#6a2a2a';
+                    deleteBtn.onclick = (e) => {
+                        e.stopPropagation();
+                        showCustomConfirm('Delete rule set "' + ruleSetName + '" and all ' + patternCount + ' patterns?', () => {
+                            deleteRuleSet(ruleSetName);
+                            loadPatternModal();
+                        });
+                    };
+                    
+                    actions.appendChild(exportBtn);
+                    actions.appendChild(deleteBtn);
+                    
+                    header.appendChild(titleDiv);
+                    header.appendChild(count);
+                    header.appendChild(actions);
+                    
+                    // Create patterns container
+                    const patternsContainer = document.createElement('div');
+                    patternsContainer.className = 'rule-set-patterns';
+                    
+                    ruleSet.patterns.forEach((pattern, patternIndex) => {
+                        const item = document.createElement('div');
+                        item.className = 'saved-pattern-item';
+                        
+                        const patternInfo = document.createElement('div');
+                        patternInfo.className = 'pattern-info';
+                        
+                        const name = document.createElement('div');
+                        name.className = 'pattern-name';
+                        name.textContent = pattern.name;
+                        
+                        const size = document.createElement('div');
+                        size.className = 'pattern-size';
+                        size.textContent = `${pattern.width}×${pattern.height} (${pattern.cells.length} cells)`;
+                        
+                        patternInfo.appendChild(name);
+                        patternInfo.appendChild(size);
+                        
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'pattern-delete';
+                        deleteBtn.textContent = 'Delete';
+                        deleteBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            showCustomConfirm('Delete pattern "' + pattern.name + '"?', () => {
+                                deletePattern(ruleSetName, patternIndex);
+                                loadPatternModal();
+                            });
+                        };
+                        
+                        item.appendChild(patternInfo);
+                        item.appendChild(deleteBtn);
+                        
+                        item.onclick = () => {
+                            selectPatternForPaste(pattern);
+                            modal.style.display = 'none';
+                        };
+                        
+                        patternsContainer.appendChild(item);
+                    });
+                    
+                    // Toggle expand/collapse
+                    header.onclick = () => {
+                        const isExpanded = patternsContainer.classList.contains('expanded');
+                        if (isExpanded) {
+                            patternsContainer.classList.remove('expanded');
+                            expandIcon.classList.remove('expanded');
+                        } else {
+                            patternsContainer.classList.add('expanded');
+                            expandIcon.classList.add('expanded');
+                        }
+                    };
+                    
+                    section.appendChild(header);
+                    section.appendChild(patternsContainer);
+                    patternsList.appendChild(section);
+                });
+            }
+            
+            modal.style.display = 'flex';
+        }
+        
+        function exportRuleSet(ruleSetName) {
+            const ruleSets = getAllRuleSets();
+            const ruleSet = ruleSets[ruleSetName];
+            
+            const exportData = {
+                name: ruleSetName,
+                ruleSet: ruleSet,
+                exportDate: new Date().toISOString()
+            };
+            
+            const jsonStr = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = ruleSetName.replace(/[^a-z0-9]/gi, '-') + '.json';
+            a.click();
+            
+            URL.revokeObjectURL(url);
+        }
+        
+        function deleteRuleSet(ruleSetName) {
+            const ruleSets = getAllRuleSets();
+            delete ruleSets[ruleSetName];
+            saveAllRuleSets(ruleSets);
+        }
+        
+        function deletePattern(ruleSetName, patternIndex) {
+            const ruleSets = getAllRuleSets();
+            ruleSets[ruleSetName].patterns.splice(patternIndex, 1);
+            
+            // If no patterns left, delete the rule set
+            if (ruleSets[ruleSetName].patterns.length === 0) {
+                delete ruleSets[ruleSetName];
+            }
+            
+            saveAllRuleSets(ruleSets);
+        }
+        
+        function selectPatternForPaste(pattern) {
+            // Convert pattern to copiedCells format
+            copiedCells = {
+                minX: 0,
+                minY: 0,
+                cells: pattern.cells
+            };
+            
+            // Activate paste mode
+            pasteMode = true;
+            const pasteButton = document.getElementById('pasteButton');
+            pasteButton.classList.add('active');
+            
+            // Deactivate select tool
+            deactivateSelectTool();
+        }
+        
+        function exportAllRuleSets() {
+            const ruleSets = getAllRuleSets();
+            
+            if (Object.keys(ruleSets).length === 0) {
+                showCustomAlert('No rule sets to export!');
+                return;
+            }
+            
+            const exportData = {
+                ruleSets: ruleSets,
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            const jsonStr = JSON.stringify(exportData, null, 2);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'GameOfLife-AllRuleSets-' + new Date().toISOString().split('T')[0] + '.json';
+            a.click();
+            
+            URL.revokeObjectURL(url);
+            
+            showCustomAlert('All rule sets exported successfully!');
+        }
+        
+        function importRuleSets(file) {
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                try {
+                    const importData = JSON.parse(e.target.result);
+                    
+                    // Check if it's a single rule set or all rule sets
+                    if (importData.ruleSet) {
+                        // Single rule set import
+                        const ruleSets = getAllRuleSets();
+                        let importName = importData.name;
+                        
+                        // Check for name collision
+                        let counter = 1;
+                        while (ruleSets[importName]) {
+                            importName = importData.name + ' (' + counter + ')';
+                            counter++;
+                        }
+                        
+                        ruleSets[importName] = importData.ruleSet;
+                        
+                        if (saveAllRuleSets(ruleSets)) {
+                            // Close modal and show success message
+                            document.getElementById('loadModal').style.display = 'none';
+                            setTimeout(() => {
+                                showCustomAlert('Rule set "' + importName + '" imported with ' + importData.ruleSet.patterns.length + ' patterns!\n\nClick Load Pattern button to view.');
+                            }, 100);
+                        } else {
+                            showCustomAlert('Failed to import. Storage might be full.');
+                        }
+                    } else if (importData.ruleSets) {
+                        // All rule sets import
+                        const existingRuleSets = getAllRuleSets();
+                        let importCount = 0;
+                        
+                        for (let ruleSetName in importData.ruleSets) {
+                            let importName = ruleSetName;
+                            let counter = 1;
+                            
+                            // Handle name collisions
+                            while (existingRuleSets[importName]) {
+                                importName = ruleSetName + ' (' + counter + ')';
+                                counter++;
+                            }
+                            
+                            existingRuleSets[importName] = importData.ruleSets[ruleSetName];
+                            importCount++;
+                        }
+                        
+                        if (saveAllRuleSets(existingRuleSets)) {
+                            // Close modal and show success message
+                            document.getElementById('loadModal').style.display = 'none';
+                            setTimeout(() => {
+                                showCustomAlert('Imported ' + importCount + ' rule set(s) successfully!\n\nClick Load Pattern button to view.');
+                            }, 100);
+                        } else {
+                            showCustomAlert('Failed to import. Storage might be full.');
+                        }
+                    } else {
+                        showCustomAlert('Invalid import file format.');
+                    }
+                } catch (error) {
+                    showCustomAlert('Error reading file: ' + error.message);
+                }
+            };
+            
+            reader.readAsText(file);
+        }
+        
+        // Save/Load functions
+        function saveGame() {
+            const gameState = {
+                grid: grid,
+                movingCells: movingCells,
+                stagnationTimers: stagnationTimers,
+                generation: generation,
+                gridWidth: GRID_WIDTH,
+                gridHeight: GRID_HEIGHT,
+                rules: {
+                    birthMin: BIRTH_MIN_NEIGHBORS,
+                    birthMax: BIRTH_MAX_NEIGHBORS,
+                    survivalMin: SURVIVAL_MIN_NEIGHBORS,
+                    survivalMax: SURVIVAL_MAX_NEIGHBORS,
+                    evolutionMin: EVOLUTION_MIN_NEIGHBORS,
+                    evolutionMax: EVOLUTION_MAX_NEIGHBORS,
+                    deathMin: DEATH_MIN_NEIGHBORS,
+                    colorExpansion: COLOR_EXPANSION_RATE
+                },
+                settings: {
+                    speed: parseInt(document.getElementById('speed').value),
+                    selectedColor: selectedColor,
+                    zoomLevel: zoomLevel,
+                    viewOffsetX: viewOffsetX,
+                    viewOffsetY: viewOffsetY,
+                    movingCellsEnabled: movingCellsEnabled,
+                    neighborsFightEnabled: neighborsFightEnabled
+                }
+            };
+            
+            const jsonStr = JSON.stringify(gameState);
+            const blob = new Blob([jsonStr], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'game-of-life-pro-save.json';
+            a.click();
+            
+            URL.revokeObjectURL(url);
+        }
+        
+        function loadGame() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (!file) return;
+                
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    try {
+                        const gameState = JSON.parse(event.target.result);
+                        
+                        // Restore grid
+                        GRID_WIDTH = gameState.gridWidth;
+                        GRID_HEIGHT = gameState.gridHeight;
+                        grid = gameState.grid;
+                        movingCells = gameState.movingCells || [];
+                        stagnationTimers = gameState.stagnationTimers || [];
+                        generation = gameState.generation || 0;
+                        
+                        // Restore rules
+                        BIRTH_MIN_NEIGHBORS = gameState.rules.birthMin;
+                        BIRTH_MAX_NEIGHBORS = gameState.rules.birthMax;
+                        SURVIVAL_MIN_NEIGHBORS = gameState.rules.survivalMin;
+                        SURVIVAL_MAX_NEIGHBORS = gameState.rules.survivalMax;
+                        EVOLUTION_MIN_NEIGHBORS = gameState.rules.evolutionMin;
+                        EVOLUTION_MAX_NEIGHBORS = gameState.rules.evolutionMax;
+                        DEATH_MIN_NEIGHBORS = gameState.rules.deathMin;
+                        COLOR_EXPANSION_RATE = gameState.rules.colorExpansion;
+                        
+                        // Update UI for rules
+                        document.getElementById('birthMin').value = BIRTH_MIN_NEIGHBORS;
+                        document.getElementById('birthMax').value = BIRTH_MAX_NEIGHBORS;
+                        document.getElementById('birthMinValue').textContent = BIRTH_MIN_NEIGHBORS;
+                        document.getElementById('birthMaxValue').textContent = BIRTH_MAX_NEIGHBORS;
+                        
+                        document.getElementById('survivalMin').value = SURVIVAL_MIN_NEIGHBORS;
+                        document.getElementById('survivalMax').value = SURVIVAL_MAX_NEIGHBORS;
+                        document.getElementById('survivalMinValue').textContent = SURVIVAL_MIN_NEIGHBORS;
+                        document.getElementById('survivalMaxValue').textContent = SURVIVAL_MAX_NEIGHBORS;
+                        
+                        document.getElementById('evolutionMin').value = EVOLUTION_MIN_NEIGHBORS;
+                        document.getElementById('evolutionMax').value = EVOLUTION_MAX_NEIGHBORS;
+                        document.getElementById('evolutionMinValue').textContent = EVOLUTION_MIN_NEIGHBORS;
+                        document.getElementById('evolutionMaxValue').textContent = EVOLUTION_MAX_NEIGHBORS;
+                        
+                        document.getElementById('deathMin').value = DEATH_MIN_NEIGHBORS;
+                        document.getElementById('deathMinValue').textContent = DEATH_MIN_NEIGHBORS;
+                        
+                        document.getElementById('colorExpansionRate').value = COLOR_EXPANSION_RATE;
+                        document.getElementById('colorExpansionValue').textContent = COLOR_EXPANSION_RATE;
+                        
+                        // Restore settings
+                        if (gameState.settings) {
+                            document.getElementById('speed').value = gameState.settings.speed;
+                            document.getElementById('speedValue').textContent = gameState.settings.speed;
+                            selectedColor = gameState.settings.selectedColor;
+                            zoomLevel = gameState.settings.zoomLevel;
+                            viewOffsetX = gameState.settings.viewOffsetX;
+                            viewOffsetY = gameState.settings.viewOffsetY;
+                            movingCellsEnabled = gameState.settings.movingCellsEnabled;
+                            neighborsFightEnabled = gameState.settings.neighborsFightEnabled;
+                            
+                            // Update UI
+                            document.querySelectorAll('.color-swatch').forEach((swatch) => {
+                                swatch.classList.toggle('active', parseInt(swatch.dataset.color) === selectedColor);
+                            });
+                            
+                            document.getElementById('toggleMovingCells').textContent = 
+                                movingCellsEnabled ? 'Moving Cells: ON' : 'Moving Cells: OFF';
+                            document.getElementById('toggleMovingCells').classList.toggle('active', movingCellsEnabled);
+                            
+                            document.getElementById('toggleNeighborsFight').textContent = 
+                                neighborsFightEnabled ? 'Neighbors Fight: ON' : 'Neighbors Fight: OFF';
+                            document.getElementById('toggleNeighborsFight').classList.toggle('active', neighborsFightEnabled);
+                        }
+                        
+                        // Update canvas size selectors
+                        document.getElementById('canvasWidth').value = GRID_WIDTH;
+                        document.getElementById('canvasHeight').value = GRID_HEIGHT;
+                        
+                        // Pause game if playing
+                        if (isPlaying) {
+                            isPlaying = false;
+                            document.getElementById('playPause').textContent = '▶ Play';
+                        }
+                        
+                        // Reinitialize canvas
+                        resizeCanvas();
+                        document.getElementById('generation').textContent = generation;
+                        document.getElementById('zoomDisplay').textContent = zoomLevel.toFixed(2) + 'x';
+                        drawGrid();
+                        
+                    } catch (error) {
+                        alert('Error loading save file: ' + error.message);
+                    }
+                };
+                reader.readAsText(file);
+            };
+            
+            input.click();
         }
         
         // Color swatch selection
@@ -1878,6 +3444,8 @@
                 // Deactivate zoom and eraser when color is selected (but keep shape tools active)
                 deactivateZoom();
                 deactivateEraser();
+                deactivateSelectTool();
+                deactivatePasteMode();
                 
                 // Remove active class from all swatches
                 document.querySelectorAll('.color-swatch').forEach(b => b.classList.remove('active'));
@@ -1889,24 +3457,25 @@
             });
         });
         
-        // Eraser button (separate from color swatches)
+        // Eraser button (now a simple tool button)
         document.getElementById('eraserButton').addEventListener('click', function() {
             // Deactivate zoom and all drawing tools when eraser is clicked
             deactivateZoom();
             deactivateLineTool();
             deactivateRectangleTool();
             deactivateOvalTool();
+            deactivateSelectTool();
+            deactivatePasteMode();
             
-            // Cycle through eraser sizes: 0 (off) -> 1 (5x5) -> 2 (25x25) -> 3 (51x51) -> 0 (off)
-            eraserSize = (eraserSize + 1) % 4;
+            // Toggle eraser mode
+            eraserMode = !eraserMode;
             
-            if (eraserSize === 0) {
+            if (!eraserMode) {
                 // Deactivate eraser
-                eraserMode = false;
+                eraserSize = 0;
                 eraserCursorPos = null;
                 canvas.classList.remove('eraser-cursor');
                 this.classList.remove('active');
-                this.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser';
                 
                 // Reactivate the previous color swatch
                 const previousColorSwatch = document.querySelector(`.color-swatch[data-color="${previousColor}"]`);
@@ -1916,25 +3485,13 @@
                 selectedColor = previousColor;
                 drawGrid();
             } else {
-                // Activate eraser with specific size
-                if (!eraserMode) {
-                    // First time activating eraser, save current color
-                    previousColor = selectedColor;
-                    eraserMode = true;
-                    // Remove active from all color swatches
-                    document.querySelectorAll('.color-swatch').forEach(b => b.classList.remove('active'));
-                }
-                
+                // Activate eraser with default size
+                previousColor = selectedColor;
+                eraserSize = 2; // Use medium size (25x25)
+                eraserMode = true;
+                // Remove active from all color swatches
+                document.querySelectorAll('.color-swatch').forEach(b => b.classList.remove('active'));
                 this.classList.add('active');
-                
-                // Update button text based on size
-                if (eraserSize === 1) {
-                    this.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser (5x5)';
-                } else if (eraserSize === 2) {
-                    this.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser (25x25)';
-                } else if (eraserSize === 3) {
-                    this.innerHTML = '<span style="font-size: 16px;">🗑️</span> Eraser (51x51)';
-                }
             }
         });
         
@@ -2179,12 +3736,19 @@
                 || (window.innerWidth <= 768);
         }
         
-        // If mobile device, automatically set to mobile size
-        if (isMobileDevice()) {
+        // Set mobile flag and hide load pattern button on mobile
+        isMobile = isMobileDevice();
+        if (isMobile) {
             GRID_WIDTH = 100;
             GRID_HEIGHT = 150;
             document.getElementById('canvasWidth').value = '100';
             document.getElementById('canvasHeight').value = '150';
+            
+            // Hide load pattern button on mobile
+            const loadPatternBtn = document.getElementById('loadPatternButton');
+            if (loadPatternBtn) {
+                loadPatternBtn.style.display = 'none';
+            }
         }
         
         // Initialize
