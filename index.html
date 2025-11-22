@@ -699,13 +699,13 @@
             <li><strong>Line Tool (╱):</strong> Click start point, move mouse (red preview line), click end point to draw straight line</li>
             <li><strong>Rectangle Tool (▢):</strong> Click corner, move mouse (red preview box), click opposite corner to draw rectangle outline</li>
             <li><strong>Oval Tool (⬭):</strong> Click corner, move mouse (red preview ellipse), click opposite corner to draw oval outline</li>
-            <li><strong>Select Tool (⬚):</strong> Click two points on canvas to select a rectangular area. Selection is automatically copied. Click and drag anywhere within the selection box to move the cells to a new position. Save button (💾) appears in bottom-right of selection box (desktop only)</li>
+            <li><strong>Select Tool (⬚):</strong> Click two points on canvas to select a rectangular area. Selection is automatically copied. Click and drag anywhere within the selection box to move the cells to a new position. Save button (💾) appears in bottom-right of selection box</li>
             <li><strong>Paste Tool (📋):</strong> After selecting/copying or loading a saved pattern, click Paste then click anywhere on canvas to place the pattern</li>
-            <li><strong>Load Pattern (📂, desktop only):</strong> Opens saved patterns library organized by rule sets. Click any pattern to load it for pasting</li>
+            <li><strong>Load Pattern (📂):</strong> Opens saved patterns library organized by rule sets. Click any pattern to load it for pasting</li>
             <li><strong>Random (🎲):</strong> Click to fill canvas with random cells in the currently selected color</li>
             <li><strong>Zoom:</strong> Cycles through OFF → IN (click to zoom in) → OUT (click to zoom out) → OFF. Auto-limited to prevent black space based on canvas size</li>
         </ul>
-        <h3>Pattern Management (Desktop Only):</h3>
+        <h3>Pattern Management:</h3>
         <ul>
             <li><strong>Rule Set Organization:</strong> Patterns are automatically organized into rule sets based on your current game rules (Birth, Survival, Evolution, Death, Color Expansion, Neighbors Fight, Moving Cells). When you save a pattern with new rules, you'll be prompted to name a new rule set</li>
             <li><strong>Save Pattern:</strong> Use Select Tool to select an area, then click the green 💾 button in bottom-right of selection box. If your current rules match an existing rule set, the pattern is saved there automatically. If rules are different, you'll name a new rule set first, then name the pattern</li>
@@ -2378,7 +2378,6 @@
         
         // Load Pattern button
         document.getElementById('loadPatternButton').addEventListener('click', function() {
-            if (isMobile) return; // Don't show on mobile
             loadPatternModal();
         });
         
@@ -2605,20 +2604,18 @@
             selectionBox.style.height = (pixelY2 - pixelY1) + 'px';
             document.body.appendChild(selectionBox);
             
-            // Create save button (bottom-right corner) - only if not mobile
-            if (!isMobile) {
-                saveButton = document.createElement('button');
-                saveButton.className = 'save-button';
-                saveButton.textContent = '💾';
-                saveButton.title = 'Save Pattern';
-                saveButton.style.right = '-24px';
-                saveButton.style.bottom = '-24px';
-                saveButton.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    savePattern();
-                });
-                selectionBox.appendChild(saveButton);
-            }
+            // Create save button (bottom-right corner)
+            saveButton = document.createElement('button');
+            saveButton.className = 'save-button';
+            saveButton.textContent = '💾';
+            saveButton.title = 'Save Pattern';
+            saveButton.style.right = '-24px';
+            saveButton.style.bottom = '-24px';
+            saveButton.addEventListener('click', (e) => {
+                e.stopPropagation();
+                savePattern();
+            });
+            selectionBox.appendChild(saveButton);
         }
         
         function removeSelectionBox() {
@@ -3736,19 +3733,13 @@
                 || (window.innerWidth <= 768);
         }
         
-        // Set mobile flag and hide load pattern button on mobile
+        // Set mobile flag for canvas size adjustment
         isMobile = isMobileDevice();
         if (isMobile) {
             GRID_WIDTH = 100;
             GRID_HEIGHT = 150;
             document.getElementById('canvasWidth').value = '100';
             document.getElementById('canvasHeight').value = '150';
-            
-            // Hide load pattern button on mobile
-            const loadPatternBtn = document.getElementById('loadPatternButton');
-            if (loadPatternBtn) {
-                loadPatternBtn.style.display = 'none';
-            }
         }
         
         // Initialize
