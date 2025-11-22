@@ -1,190 +1,452 @@
-# -The Game of Life Pro-
+# The Game of Life Pro
 
-## 🎮 What Is This?
+A highly advanced implementation of Conway's Game of Life with color evolution, moving cells, territorial battles, and intelligent pattern management organized by rule sets.
 
-This is Conway's Game of Life reimagined with colors and propagation. Cells don't just live and die, they can evolve through a rainbow hierarchy. When they become stagnant they can invade neighboring colors and/or spawn moving cells in an attempt to continue their growth and development.
+## Overview
 
-Watch simple patterns explode into complex, ever-changing color wars. It's hypnotic, chaotic, and endlessly fascinating.
+The Game of Life Pro is an enhanced cellular automaton simulation that extends the classic Game of Life with multiple colors, evolution mechanics, moving cell spores, and territorial competition. Each color can spawn, survive, evolve, and compete for space on the canvas. Patterns are automatically organized by rule configurations for easy experimentation and discovery.
 
-## ✨ Key Features
+## Quick Start
+
+1. Open `index.html` in any modern web browser
+2. Click **▶ Play** to start the simulation
+3. Click on the canvas to draw cells
+4. Experiment with the color palette, drawing tools, and rule sliders
+5. Use pattern management features to save and organize your discoveries
+
+## Game Rules
 
 ### Core Mechanics
-- **9-Color Evolution System**: White → Red → Orange → Yellow → Green → Cyan → Blue → Purple → Magenta → (back to White spore)
-- **Moving Cells**: Stagnant cells spawn mobile "spores" that travel across the grid, convert enemy colors, and create dynamic warfare
-- **Neighbors Fight**: Colored cells convert adjacent lower-tier colors, creating territorial expansion and color dominance battles
-- **Color Expansion Rate**: Adjustable stagnation threshold (1-300 generations) that controls how quickly moving cells spawn and color conversion happens
 
-### Drawing Tools
-- **9 Color Palette**: Click any color swatch to paint cells on the canvas
-- **Multi-Size Eraser**: Cycles through 5x5 → 25x25 → 51x51 → OFF with visual red circle indicator (fills when actively erasing)
-- **Line Tool**: Draw straight lines between two points
-- **Rectangle Tool**: Draw hollow rectangles
-- **Oval Tool**: Draw hollow ovals/ellipses
-- **Zoom Controls**: Zoom in/out to see intricate details or get a bird's-eye view
+- **Birth**: Empty cells with exactly 3 neighbors of the same color are born as that color
+  - Default range: 3-3 neighbors (adjustable from 0-8)
+  - Example: An empty cell surrounded by 3 red cells becomes red
 
-### Customization
-- **Adjustable Rules**: Modify birth, survival, evolution, and death neighbor counts
-- **Canvas Sizing**: Choose from preset sizes or create custom dimensions (50-500 cells)
-- **Speed Control**: Adjust simulation speed from 1-30 generations per second
-- **Toggle Features**: Turn Moving Cells and Neighbors Fight on/off independently
+- **Evolution**: Cells with exactly 4 neighbors evolve to the next color in the hierarchy
+  - Default range: 4-4 neighbors (adjustable from 0-8)
+  - **IMPORTANT**: Evolution is checked BEFORE survival, meaning cells will evolve even if they would normally survive
+  - This allows overlapping evolution and survival ranges for dynamic gameplay
+  - Example: With Survival 2-6 and Evolution 4-5, cells with 4-5 neighbors evolve while 2-3 neighbors just survive
 
-## 🕹️ How to Use
+- **Survival**: Living cells survive if they have 2-3 neighbors
+  - Default range: 2-3 neighbors (adjustable from 0-8)
+  - Only applies if evolution doesn't trigger first
+  - Cells with too few or too many neighbors will die
 
-### Getting Started
-1. **Open the HTML file** in any modern web browser (Chrome, Firefox, Safari, Edge)
-2. **Click a color swatch** from the palette to select your drawing color
-3. **Click or drag on the canvas** to place cells
-4. **Press Play (▶)** to watch the simulation run
-5. **Experiment!** Try different patterns, colors, and settings
+- **Death**: Cells die from isolation (<2 neighbors) or overpopulation (5+ neighbors)
+  - Default: 5+ neighbors causes death (adjustable from 0-8)
+  - Dead cells become empty (black) cells
 
-### Controls Overview
+### Color Hierarchy
 
-#### Playback Controls
-- **Play/Pause**: Start or stop the simulation
-- **Step**: Advance one generation at a time
-- **Clear**: Erase the entire canvas
-- **Random**: Fill canvas with random white cells
-- **Speed Slider**: Control how fast generations advance (1-30)
+```
+White → Red → Orange → Yellow → Green → Cyan → Blue → Purple → Magenta → White (cycles)
+```
 
-#### Drawing Tools
-- **Color Swatches**: Select from 9 colors in the palette above the controls
-- **Eraser Tool**: Click to cycle through sizes (5x5 → 25x25 → 51x51 → OFF)
-  - Red outline shows eraser size
-  - Fills red when actively erasing (mouse/touch down)
-  - Click through all sizes to turn off
-- **Line Tool**: Click start point, then end point
-- **Rectangle Tool**: Click one corner, then opposite corner
-- **Oval Tool**: Click one corner, then opposite corner
-- **Zoom**: Cycle through OFF → Zoom In → Zoom Out modes
+### Special Mechanics
 
-#### Advanced Settings
-- **Birth Range**: How many neighbors needed for a cell to be born (default: 3-3)
-- **Survival Range**: How many neighbors needed for a cell to survive (default: 2-3)
-- **Evolution Range**: How many neighbors needed for a cell to evolve colors (default: 4-4)
-- **Death Threshold**: How many neighbors cause death by overpopulation (default: 5+)
-- **Color Expansion Rate**: Stagnation timer for spawning movers and color fights (default: 100)
+#### Magenta Special
+Magenta is the final color in the evolution chain and has special behavior:
+- With **Moving Cells ON**: Magenta cells in evolution range spawn a moving white spore and die
+- With **Moving Cells OFF**: Magenta cells evolve back to white
 
-## 🎯 Pro Tips
+#### Moving Cells (Toggleable)
+When enabled, stagnant cells spawn moving cell spores:
+- **Stagnation**: Cells with 3+ same-color neighbors that haven't changed for the Color Expansion Rate
+- **Movement**: Moving cells travel outward (70% straight, 30% turn chance)
+- **Passing**: Moving cells pass through other movers
+- **Conversion**: After 4+ frames, movers stop on same color or convert entire groups of different colors
+- Creates organic spreading and colonization patterns
 
-### For Beginners
-1. **Start Simple**: Draw a small cluster of one color and press Play
-2. **Try Classic Patterns**: Draw a glider, blinker, or block from classic Game of Life
-3. **Use the Eraser**: Multi-size eraser with visual feedback makes editing easy
-4. **Watch the Generation Counter**: See how fast your patterns evolve
+#### Neighbors Fight (Toggleable)
+When enabled, higher-tier colors can convert adjacent lower-tier neighbors:
+- Stagnant cells of a higher color convert adjacent lower-colored neighbors
+- Conversion occurs based on the Color Expansion Rate timing
+- Creates territorial battles and color wars
+- Example: Red cells can convert adjacent white cells to red
 
-### For Experimentation
-1. **Fast Chaos**: Set Color Expansion Rate to 50 for rapid moving cell spawns and quick color wars
-2. **Slow Evolution**: Set Color Expansion Rate to 200 for stable, gradual changes
-3. **Color Battles**: Turn on BOTH Moving Cells + Neighbors Fight for epic warfare
-4. **Pure Life**: Turn OFF both features for classic Conway's Life behavior (with colors)
-5. **Mobile Friendly**: Canvas automatically adjusts to 100x150 on mobile devices
+#### Color Expansion Rate
+Controls the speed of advanced mechanics:
+- Range: 1-300 generations
+- Default: 100 generations
+- Lower values = faster Moving Cells spawning and Neighbors Fight conversions
+- Higher values = more stability before stagnation kicks in
+- Affects both Moving Cells timing and Neighbors Fight timing
 
-### Cool Patterns to Try
-- **Rainbow Collision**: Draw lines of different colors pointing at each other
-- **Color Flower**: Use the Oval tool to create concentric circles of different colors
-- **Spore Storm**: Create a dense cluster of high-tier colors (purple/magenta) and watch them spawn armies
-- **Territorial Wars**: Paint large blocks of different colors and turn on Neighbors Fight
+## Drawing Tools
 
-## 🧬 Understanding the Rules
+### Color Selection
+- Click any of the 9 color swatches to select a drawing color
+- White, Red, Orange, Yellow, Green, Cyan, Blue, Purple, Magenta
+- Selected color is highlighted with a white border
+- Click or drag on canvas to draw cells in the selected color
 
-### Classic Game of Life Rules
-The foundation follows Conway's original rules:
-- **Birth**: Dead cells with exactly 3 living neighbors become alive
-- **Survival**: Living cells with 2-3 neighbors survive
-- **Death**: Living cells with <2 neighbors die (isolation) or 5+ die (overpopulation)
+### Tool Buttons
 
-### Color Evolution Rules
-When cells have exactly 4 neighbors, they evolve:
-- White → Red → Orange → Yellow → Green → Cyan → Blue → Purple → Magenta
-- **Magenta Special**: Instead of evolving to the next color, magenta cells spawn a moving white spore (if Moving Cells ON) or become white (if Moving Cells OFF)
+#### Eraser (🗑)
+- Click to activate/deactivate: 25×25 → OFF
+- Red circle cursor shows eraser size
+- Circle fills in when actively erasing
+- Click or drag to erase cells
 
-### Moving Cells Behavior
-When a cell is stagnant (unchanged for Color Expansion Rate generations) with 3+ same-color neighbors:
-1. Spawns a moving cell in an empty adjacent space
-2. Moving cell travels in a direction (70% straight, 30% random turn)
-3. Passes through other moving cells without interaction
-4. After aging 4+ generations, can:
-   - Stop when encountering same color
-   - Convert entire connected groups of different colors to its color
+#### Line Tool (╱)
+1. Click to activate (button highlights)
+2. Click canvas for start point
+3. Move mouse to see red preview line
+4. Click again for end point to draw straight line
 
-### Neighbors Fight
-When enabled, stagnant colored cells (Red through Magenta):
-- Convert adjacent lower-tier color neighbors to match their color
-- Creates territorial expansion and color dominance
-- Only affects stationary cells, not moving cells
+#### Rectangle Tool (▢)
+1. Click to activate (button highlights)
+2. Click canvas for first corner
+3. Move mouse to see red preview rectangle
+4. Click again for opposite corner to draw rectangle outline
 
-## 📱 Mobile Support
+#### Oval Tool (⬭)
+1. Click to activate (button highlights)
+2. Click canvas for first corner
+3. Move mouse to see red preview ellipse
+4. Click again for opposite corner to draw oval outline
 
-The game works great on mobile devices!
-- **Touch Controls**: Tap and drag to draw
-- **Auto-Detection**: Canvas automatically sizes to 100x150 on mobile
-- **Responsive**: All controls work with touch input
-- **Eraser Feedback**: Red filled circle appears when actively erasing with touch
-- **Zoom**: Use zoom to see details on small screens
+#### Random (🎲)
+- Fills entire canvas with random cells in the currently selected color
+- Great for creating chaotic starting conditions with specific colors
 
-## 🐛 Troubleshooting
+#### Select Tool (⬚)
+1. Click to activate (button highlights)
+2. Click two points on canvas to select a rectangular area
+3. Selection is automatically copied
+4. Click and drag anywhere within the selection box to move cells to a new position
+5. Green save button (💾) appears in bottom-right corner (desktop only)
+6. Click outside selection or deactivate tool to finalize placement
 
-**Game runs too fast/slow:**
-- Adjust the Speed slider (1-30)
-- Higher values = faster generations
+#### Paste Tool (📋)
+1. First select and copy cells OR load a saved pattern
+2. Click Paste button to activate paste mode
+3. Click anywhere on canvas to place the pattern
+4. Pattern centers on your click position
+5. Click Paste again to deactivate
 
-**Want classic Conway's Life:**
-- Turn OFF Moving Cells
-- Turn OFF Neighbors Fight
-- Reset Rules to Default
+#### Load Pattern (📂) - Desktop Only
+- Opens the saved patterns library organized by rule sets
+- Displays all rule sets with their configurations
+- Click rule set headers to expand/collapse pattern lists
+- Click any pattern to load it for pasting
+- Each rule set shows its complete configuration (including Neighbors Fight and Moving Cells)
+- Patterns are stored in browser's local storage
 
-**Canvas too small/large:**
-- Mobile devices auto-detect and use 100x150
-- Desktop: set custom size with Width/Height dropdowns
-- Click "Apply Size" after changes
+## Pattern Management (Desktop Only)
 
-**Eraser not working:**
-- Click the Eraser button to activate (it should highlight)
-- Look for the red circle that follows your mouse/finger
-- Circle fills red when actively erasing
-- Click through all sizes (5x5 → 25x25 → 51x51) to turn off
+### Rule Set Organization
 
-**Moving cells not spawning:**
-- Check that "Moving Cells: ON" is active
-- Increase stagnant cell clusters (they need 3+ same-color neighbors)
-- Lower Color Expansion Rate for faster spawning (try 50)
+Patterns are automatically organized into "rule sets" based on your current game configuration:
+- Birth range (min-max)
+- Survival range (min-max)
+- Evolution range (min-max)
+- Death threshold
+- Color Expansion Rate
+- **Neighbors Fight** (ON/OFF)
+- **Moving Cells** (ON/OFF)
 
-## 🎨 Technical Details
+When you change ANY of these settings, saving a pattern will create a new rule set!
 
-- **Pure HTML/CSS/JavaScript**: No dependencies, runs entirely in the browser
-- **Canvas API**: Used for rendering the grid
-- **Cell States**: 10 states (0=empty, 1-9=colors)
-- **Moving Cells**: Tracked separately with position, direction, color, and age
-- **Stagnation Timer**: Tracks how long each cell has been unchanged
-- **Touch Events**: Full mobile support with touch handling
-- **Responsive Design**: Color palette adapts for mobile screens
+### Saving Patterns
 
-## 📜 Credits
+**First Pattern with New Rules:**
+1. Activate the Select Tool (⬚)
+2. Click two points to select an area containing cells
+3. Click the green save button (💾) in the bottom-right corner of the selection box
+4. Prompted: "New Rule Set Detected" with current rules displayed
+5. Enter a name for the rule set (e.g., "Rapid Evolution" or "Territory Wars")
+6. Prompted: "Saving Pattern"
+7. Enter a name for the pattern
+8. Pattern saved to new rule set!
 
-- I designed and organized this program in 3 days using Claude Sonnet 4.5
+**Subsequent Patterns with Same Rules:**
+1. Select cells with Select tool
+2. Click Save button (💾)
+3. Only prompted for pattern name
+4. Automatically saved to matching rule set!
 
-Inspired by:
-- **John Conway's Game of Life** (1970) - The original cellular automaton
-- **Rainbow War** - Rainbow War 1986 ‧ Comedy/Fantasy ‧ (20 min film)
+**Example Organization:**
+```
+📁 Classic Game of Life
+   Birth: 3-3, Survival: 2-3, Evolution: 4-4, Death: 5+
+   Neighbors Fight: ON, Moving Cells: ON
+   [12 patterns]
+   
+📁 Rapid Color Change
+   Birth: 2-4, Survival: 2-6, Evolution: 4-5, Death: 7+
+   Neighbors Fight: ON, Moving Cells: ON
+   [8 patterns]
+   
+📁 Stable Growth (No Fight)
+   Birth: 3-3, Survival: 2-4, Evolution: 5-5, Death: 6+
+   Neighbors Fight: OFF, Moving Cells: OFF
+   [5 patterns]
+```
 
-## 📄 License
+### Loading Patterns
 
-This is a fun educational project. Feel free to:
-- Share it with friends
-- Modify it for learning
-- Use it in educational contexts
-- Experiment and create variations
+1. Click the Load Pattern button (📂) in the toolbar
+2. Rule sets appear as collapsible sections
+3. Click rule set header to expand/collapse
+4. See full rule configuration for each set
+5. Click any pattern to load it into paste mode
+6. Click on canvas to place it wherever you want
+7. Pattern automatically centers on your click position
 
-Just keep the spirit of discovery and wonder alive! 🌟
+### Export & Import
+
+**Export Single Rule Set:**
+- Click "Export" button next to any rule set
+- Downloads as JSON file named after the rule set
+- Share with others or backup individually
+
+**Export All Rule Sets:**
+- Click "Export All" button at bottom of Load Pattern dialog
+- Downloads complete library as single JSON file
+- Perfect for backing up your entire collection
+
+**Import Rule Sets:**
+- Click "Import" button at bottom of Load Pattern dialog
+- Select a previously exported JSON file
+- Automatically handles name collisions (adds numbers if needed)
+- Success message appears, click Load Pattern to view imported data
+- Works with both single rule set and "all rule sets" exports
+
+### Managing Rule Sets
+
+**Delete Individual Pattern:**
+- Expand a rule set
+- Click "Delete" button next to any pattern
+- Confirm deletion
+- If it's the last pattern, entire rule set is removed
+
+**Delete Entire Rule Set:**
+- Click "Delete" button next to rule set name
+- Confirm deletion of rule set and ALL its patterns
+- Permanently removes from storage
+
+**View Pattern Details:**
+- Each pattern shows: name, dimensions (width×height), cell count
+- Rule sets show: complete configuration, pattern count
+
+Note: Pattern save/load features are automatically hidden on mobile devices.
+
+## Game Controls
+
+### Main Controls
+
+- **▶ Play/Pause**: Start or stop the simulation
+- **Step**: Advance exactly one generation (great for studying patterns)
+- **Clear**: Erase all cells from the canvas
+- **Zoom**: Cycles through OFF → IN → OUT → OFF
+  - IN mode: Click canvas to zoom in (up to 4x)
+  - OUT mode: Click canvas to zoom out (down to 0.25x)
+  - Automatically limited to prevent showing empty black space
+  - Drag canvas while zoomed to pan the view
+
+### Speed Control
+
+- Slider adjusts simulation speed from 1 to 30 generations per second
+- Lower values: Slower, easier to observe patterns
+- Higher values: Faster, for long-term evolution observation
+
+### Canvas Size
+
+- Width dropdown: 50 to 500 cells
+- Height dropdown: 50 to 500 cells
+- Click "Apply Size" to rebuild the grid with new dimensions
+- Warning: Changing size clears the current canvas
+- Mobile devices automatically use 100×150 for performance
+
+## Rule Customization
+
+All rules are adjustable via slider controls below the canvas:
+
+### Birth Range (Min-Max)
+- Default: 3-3 neighbors
+- Controls when empty cells become alive
+- Lower minimum: More aggressive spawning
+- Higher maximum: Allows births with more neighbors
+
+### Evolution Range (Min-Max) ⭐ NEW BEHAVIOR
+- Default: 4-4 neighbors
+- **Evolution is checked FIRST** (before survival)
+- Can now overlap with survival range!
+- Example: Survival 2-6, Evolution 4-5 → Cells with 4-5 neighbors evolve, 2-3 just survive
+- Wider range: More color changes and visual variety
+- Narrow range: More stable color regions
+
+### Survival Range (Min-Max)
+- Default: 2-3 neighbors
+- Controls which cells stay alive
+- Only applies if evolution doesn't trigger
+- Can now be wider without blocking evolution!
+- Range 0-0: Almost everything dies (crystal growth patterns)
+- Range 0-8: Almost nothing dies (very stable)
+
+### Death Threshold (Minimum)
+- Default: 5+ neighbors
+- Cells with this many or more neighbors die from overpopulation
+- Lower values: More aggressive culling
+- Higher values: Denser populations survive
+
+### Reset Rules to Default
+- Click "Reset Rules to Default" button to restore:
+  - Birth: 3-3
+  - Survival: 2-3
+  - Evolution: 4-4
+  - Death: 5+
+  - Color Expansion Rate: 100
+
+## Advanced Features
+
+### Moving Cells Toggle
+- **ON** (default): Enables moving cell spores
+  - Stagnant cells spawn mobile spores that colonize new areas
+  - Creates organic, spreading patterns
+  - Magenta cells spawn white spores instead of evolving
+  - Included in rule set signature
+
+- **OFF**: Disables moving cells
+  - Pure cellular automaton behavior
+  - Magenta evolves to white instead of spawning spores
+  - More predictable, classic Game of Life behavior
+
+### Neighbors Fight Toggle
+- **ON** (default): Enables territorial color battles
+  - Higher-tier colors convert adjacent lower-tier colors
+  - Creates expanding territories and color wars
+  - Based on Color Expansion Rate timing
+  - Included in rule set signature
+
+- **OFF**: Disables color conversion
+  - Colors only change through evolution rules
+  - More stable, less aggressive dynamics
+
+### Save/Load Game State
+- **Save Game**: Downloads complete game state as JSON file
+  - Includes: grid, moving cells, rules, settings, generation count
+  - Can be loaded later to resume exactly where you left off
+
+- **Load Game**: Upload a previously saved JSON file
+  - Restores everything: pattern, rules, zoom level, generation count
+  - Great for sharing interesting configurations
+
+## Tips & Tricks
+
+### Creating Interesting Patterns
+
+1. **Birth Minimum = 0 Warning**: Avoid setting birth minimum to 0 as it causes rapid, unpleasant blinking
+
+2. **Wide Birth Range**: Open the birth range (e.g., 2-5) to create explosive, chaotic reactions
+
+3. **Overlapping Evolution & Survival**: ⭐ NEW! Try Survival 2-6 with Evolution 4-5 for dynamic color shifting while maintaining stable regions
+
+4. **Low Survival Minimum**: Set survival minimum to 0 or 1 to create beautiful crystal-like growth patterns
+
+5. **Pattern Library Organization**: Save patterns with different rule combinations. Try:
+   - High Chaos: Wide ranges with both toggles ON
+   - Stable Growth: Narrow ranges with both toggles OFF
+   - Territory Wars: Neighbors Fight ON, Moving Cells OFF
+   - Spreading Colonies: Moving Cells ON, Neighbors Fight OFF
+
+### Performance Tips
+
+- Smaller canvas sizes (100×150 or less) run faster on mobile devices
+- Lower simulation speed (1-10) for detailed observation
+- Use Step button to advance frame-by-frame when studying complex interactions
+
+### Experiment Ideas
+
+- **Evolution Priority Testing**: Survival 1-7, Evolution 3-5 → Watch evolution dominate
+- **Stable Patterns**: Find oscillators and still lifes by adjusting survival range
+- **Color Wars**: Enable Neighbors Fight with high Color Expansion Rate for epic battles
+- **Spreading Colonies**: Enable Moving Cells with low Color Expansion Rate for aggressive expansion
+- **Custom Rules**: Try survival 1-1 with death 3+ for completely different dynamics
+- **Pattern Combinations**: Save small patterns and combine them by pasting multiple times
+- **Rule Set Comparison**: Create identical patterns in different rule sets to see how rules affect evolution
+
+## Technical Details
+
+### Browser Compatibility
+- Works in all modern browsers (Chrome, Firefox, Safari, Edge)
+- Requires JavaScript enabled
+- Local storage required for pattern save/load features
+
+### Mobile Support
+- Touch controls supported for drawing and tool use
+- Automatic canvas size adjustment (100×150)
+- Pattern save/load features hidden on mobile
+- Select and paste tools fully functional on mobile
+
+### Storage
+- Patterns organized by rule sets in browser's localStorage
+- No server required, all data stored locally
+- Patterns persist between sessions
+- Clear browser data will remove saved patterns
+- Rule sets include all configuration details
+
+### Rule Set Signatures
+Each rule set has a unique signature based on:
+- Birth range (min-max)
+- Survival range (min-max)  
+- Evolution range (min-max)
+- Death threshold
+- Color Expansion Rate
+- Neighbors Fight (ON/OFF)
+- Moving Cells (ON/OFF)
+
+Changing ANY of these creates a new rule set!
+
+## Keyboard Shortcuts
+
+Currently no keyboard shortcuts are implemented. All controls are accessible via mouse/touch interface.
+
+## What's New
+
+### Recent Updates
+
+**Evolution Priority System:**
+- Evolution now checked BEFORE survival
+- Allows overlapping evolution and survival ranges
+- Creates more dynamic color-shifting gameplay
+- Opens up new strategic possibilities with wide survival ranges
+
+**Enhanced Rule Set Organization:**
+- Patterns automatically organized by complete rule configuration
+- Includes Neighbors Fight and Moving Cells in signatures
+- Collapsible rule set sections in Load Pattern dialog
+- Full rule descriptions displayed for each set
+
+**Import/Export Improvements:**
+- Export individual rule sets or entire library
+- Import handles name collisions automatically
+- Success messages guide user to view imported data
+- No page refresh needed after import
+
+**Bug Fixes:**
+- Load Pattern button now works immediately after saving
+- Import no longer causes modal errors
+- All dialogs properly restore modal structure
+
+## Credits
+
+An enhanced implementation of Conway's Game of Life featuring:
+- Multi-color evolution system with priority mechanics
+- Moving cell spores
+- Territorial color battles
+- Intelligent pattern organization by rule sets
+- Comprehensive drawing tools
+- Export/Import capabilities
+
+## Version
+
+Current Version: 1.1 (Evolution Priority + Rule Set Organization)
 
 ---
 
-## 🚀 Quick Start Guide
+**Enjoy exploring the infinite possibilities of The Game of Life Pro!**
 
-1. **Open the HTML file** in your browser
-2. **Click a color swatch** from the palette
-3. **Draw some cells** on the canvas
-4. **Press Play ▶**
-5. **Watch the magic happen** ✨
-
-Enjoy exploring the emergent beauty of cellular automata! 🎮🌈
+**Pro Tip**: Start with the defaults, then try Survival 2-6 with Evolution 4-4 to see how the new evolution priority system creates beautiful, dynamic color cascades!
