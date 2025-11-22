@@ -116,7 +116,7 @@ Controls the speed of advanced mechanics:
 2. Click two points on canvas to select a rectangular area
 3. Selection is automatically copied
 4. Click and drag anywhere within the selection box to move cells to a new position
-5. Green save button (💾) appears in bottom-right corner (desktop only)
+5. Green save button (💾) appears in bottom-right corner 
 6. Click outside selection or deactivate tool to finalize placement
 
 #### Paste Tool (📋)
@@ -134,7 +134,7 @@ Controls the speed of advanced mechanics:
 - Each rule set shows its complete configuration (including Neighbors Fight and Moving Cells)
 - Patterns are stored in browser's local storage
 
-## Pattern Management (Desktop Only)
+## Pattern Management 
 
 ### Rule Set Organization
 
@@ -231,7 +231,7 @@ When you change ANY of these settings, saving a pattern will create a new rule s
 - Each pattern shows: name, dimensions (width×height), cell count
 - Rule sets show: complete configuration, pattern count
 
-Note: Pattern save/load features are automatically hidden on mobile devices.
+
 
 ## Game Controls
 
@@ -378,8 +378,9 @@ All rules are adjustable via slider controls below the canvas:
 ### Mobile Support
 - Touch controls supported for drawing and tool use
 - Automatic canvas size adjustment (100×150)
-- Pattern save/load features hidden on mobile
+- **Pattern save/load fully supported on mobile**
 - Select and paste tools fully functional on mobile
+- All features available on mobile devices
 
 ### Storage
 - Patterns organized by rule sets in browser's localStorage
